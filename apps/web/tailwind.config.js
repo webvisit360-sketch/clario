@@ -12,10 +12,10 @@ module.exports = {
       colors: {
         // Brand identity — use brand-primary, brand-accent etc. in new code
         brand: {
-          primary: '#1a1a2e',
-          accent:  '#e8a838',
-          success: '#2a9d4e',
-          danger:  '#d64444',
+          primary: '#0b0b10',
+          accent:  '#00aee6',
+          success: '#3dc455',
+          danger:  '#f0372a',
         },
         // shadcn/ui CSS-variable tokens
         background:  'hsl(var(--background))',
@@ -52,8 +52,8 @@ module.exports = {
         input:   'hsl(var(--input))',
         ring:    'hsl(var(--ring))',
         // Standalone aliases kept for legacy usage
-        success: '#2a9d4e',
-        danger:  '#d64444',
+        success: '#3dc455',
+        danger:  '#f0372a',
       },
       borderRadius: {
         lg: 'var(--radius)',

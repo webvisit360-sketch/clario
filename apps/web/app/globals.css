@@ -4,34 +4,34 @@
 
 @layer base {
   :root {
-    /* Dark navy theme — maps brand colours into shadcn CSS-var system */
-    --background:           234 35% 8%;    /* #0f0f1a */
-    --foreground:           210 20% 92%;
+    /* Drone.io-inspired — cool dark + cyan accent, high contrast */
+    --background:           240 18% 5%;    /* #0b0b10 near-black */
+    --foreground:           210 18% 94%;   /* #eef0f4 near-white */
 
-    --card:                 234 33% 12%;
-    --card-foreground:      210 20% 92%;
+    --card:                 240 16% 9%;    /* #121219 dark panel */
+    --card-foreground:      210 18% 94%;
 
-    --popover:              234 33% 12%;
-    --popover-foreground:   210 20% 92%;
+    --popover:              240 16% 9%;
+    --popover-foreground:   210 18% 94%;
 
-    --primary:              38 80% 56%;    /* gold  #e8a838 */
-    --primary-foreground:   234 35% 8%;   /* navy text on gold */
+    --primary:              197 100% 48%; /* #00aee6 — brighter than drone's #00ade4 */
+    --primary-foreground:   240 18% 5%;   /* dark text on cyan */
 
-    --secondary:            234 28% 18%;
-    --secondary-foreground: 210 20% 92%;
+    --secondary:            240 14% 16%;  /* #1e1e28 */
+    --secondary-foreground: 210 18% 94%;
 
-    --muted:                234 25% 20%;
-    --muted-foreground:     215 16% 55%;
+    --muted:                240 12% 19%;  /* #272732 */
+    --muted-foreground:     237 14% 60%;  /* #8d8fa8 */
 
-    --accent:               38 80% 56%;   /* gold */
-    --accent-foreground:    234 35% 8%;
+    --accent:               197 100% 48%;
+    --accent-foreground:    240 18% 5%;
 
-    --destructive:          0 65% 55%;    /* #d64444 */
-    --destructive-foreground: 210 20% 92%;
+    --destructive:          4 82% 56%;    /* #f0372a brighter red */
+    --destructive-foreground: 210 18% 94%;
 
-    --border:               234 22% 22%;
-    --input:                234 22% 22%;
-    --ring:                 38 80% 56%;   /* gold focus ring */
+    --border:               240 14% 18%;  /* #232330 */
+    --input:                240 14% 18%;
+    --ring:                 197 100% 48%; /* cyan focus ring */
 
     --radius: 0.5rem;
   }
