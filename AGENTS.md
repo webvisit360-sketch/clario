@@ -293,3 +293,144 @@ pnpm format
 - All API route handlers must call `next(err)` on error — never `res.status(500).json(...)` inline
 - DB query functions in `@clario/supabase` throw on error — callers must `try/catch`
 - Use `toast.error()` / `toast.success()` (sonner) for user feedback — no `alert()`
+
+---
+
+## Supabase Development Best Practices
+
+### Branch → Environment mapping
+
+| Git branch | Supabase project | GitHub Actions workflow |
+|------------|-----------------|------------------------|
+| `staging`  | Staging project  | `supabase-staging.yml` |
+| `main`     | Production project | `supabase-production.yml` |
+
+**Rule:** Never apply migrations directly in the Supabase dashboard on staging or production. All schema changes go through `supabase/migrations/` and are deployed via CI.
+
+---
+
+### Supabase CLI — local dev workflow
+
+```bash
+# 1. Install CLI (once)
+brew install supabase/tap/supabase
+
+# 2. Login
+supabase login
+
+# 3. Start local stack (Docker required)
+supabase start
+# Gives you: local DB on :54322, Studio on :54323, API on :54321
+
+# 4. After making schema changes, generate a new migration
+supabase db diff --schema public -f your_migration_name
+# Creates supabase/migrations/<timestamp>_your_migration_name.sql
+
+# 5. Apply to local DB
+supabase db reset   # full reset + all migrations + seed.sql
+# or
+supabase db push    # apply only new migrations (no seed)
+
+# 6. Stop local stack
+supabase stop
+```
+
+---
+
+### Migration rules
+
+1. **Never edit an applied migration.** Once a migration file is committed and pushed, treat it as immutable. Create a new migration instead.
+2. **Naming convention:** `<timestamp>_<snake_case_description>.sql`
+   - Timestamp format: `YYYYMMDDHHMMSS` (e.g. `20240315143000_add_seller_logo_url.sql`)
+   - Generated automatically by `supabase db diff -f <name>`
+3. **One concern per migration.** Don't combine unrelated table changes in one file.
+4. **Always include the reverse** as a comment at the bottom for documentation (but don't run it automatically):
+   ```sql
+   -- Rollback (run manually if needed):
+   -- alter table public.sellers drop column logo_url;
+   ```
+5. **Test locally first:** `supabase db reset` must succeed with zero errors before committing.
+
+---
+
+### RLS (Row Level Security) rules
+
+- **RLS is always enabled** on every table — never disable it.
+- Every new table needs at least one policy before data can be read/written.
+- Use `auth.uid()` to scope policies to the authenticated user.
+- The `serverClient` (service role key) **bypasses RLS** — use it only in `apps/api` server-side code, never expose the service role key to the browser.
+- Policy naming convention: `"<table>: <description>"` e.g. `"sellers: owner access"`
+- When writing policies, cover all operations explicitly: `for select`, `for insert`, `for update`, `for delete` (or `for all` when all four are identical).
+
+---
+
+### GitHub Actions secrets (required for CI)
+
+Add these in **GitHub → Settings → Secrets and variables → Actions**:
+
+| Secret | Where to find it |
+|--------|-----------------|
+| `SUPABASE_ACCESS_TOKEN` | [supabase.com/dashboard/account/tokens](https://supabase.com/dashboard/account/tokens) |
+| `STAGING_SUPABASE_PROJECT_ID` | Supabase Dashboard → Staging project → Settings ��� General → Reference ID |
+| `STAGING_SUPABASE_DB_PASSWORD` | Supabase Dashboard → Staging project → Settings → Database → Database password |
+| `PROD_SUPABASE_PROJECT_ID` | Supabase Dashboard → Production project → Settings → General → Reference ID |
+| `PROD_SUPABASE_DB_PASSWORD` | Supabase Dashboard → Production project → Settings → Database → Database password |
+
+Also add **GitHub Environments** (`staging`, `production`) under Settings → Environments. This enables environment-specific protection rules (e.g. require reviewer approval before production deploys).
+
+---
+
+### Adding a new migration (step-by-step)
+
+```bash
+# 1. Start local stack
+supabase start
+
+# 2. Make schema changes via SQL or Studio (localhost:54323)
+#    e.g. add a column in Studio
+
+# 3. Diff the changes into a migration file
+supabase db diff --schema public -f add_seller_logo_url
+
+# 4. Review the generated file
+cat supabase/migrations/*_add_seller_logo_url.sql
+
+# 5. Reset local DB to verify the full migration chain works
+supabase db reset
+
+# 6. Commit and push to staging branch → CI deploys automatically
+git add supabase/migrations/
+git commit -m "db: add seller logo_url column"
+git push origin staging
+
+# 7. Verify in Supabase Staging Dashboard → Database → Migrations
+# 8. After staging validation, merge to main → CI deploys to production
+```
+
+---
+
+### Supabase project setup checklist (new environment)
+
+- [ ] Create project at [supabase.com](https://supabase.com)
+- [ ] Copy **Project Reference ID** → add to GitHub secrets
+- [ ] Copy **Database password** → add to GitHub secrets
+- [ ] Copy **Project URL** + **Publishable Default Key** + **Service Role Key** → add to hosting env vars
+- [ ] Enable **Email auth** in Authentication → Providers
+- [ ] Disable **Email confirmations** for dev (enable for production)
+- [ ] Set **Site URL** in Authentication → URL Configuration → your app's URL
+- [ ] Add redirect URL: `https://your-app.com/**`
+- [ ] Run initial migration: `supabase db push --project-ref <ref>`
+
+---
+
+### Do's and Don'ts
+
+| ✅ Do | ❌ Don't |
+|-------|---------|
+| Create migrations with `supabase db diff` | Edit tables directly in the dashboard without a migration |
+| Use `serverClient` (service role) only in `apps/api` | Expose `SUPABASE_SERVICE_ROLE_KEY` to the browser |
+| Test every migration with `supabase db reset` locally | Push broken migrations to staging |
+| Use RLS policies for all data access | Disable RLS or use `service_role` for regular app reads |
+| Use `auth.uid()` in policies | Hard-code user IDs in policies |
+| Keep `staging` in sync with `main` | Let staging drift significantly from production schema |
+| Use `supabase db push` in CI | Run raw SQL in the dashboard on production |

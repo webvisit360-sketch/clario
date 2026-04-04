@@ -1,0 +1,9 @@
+-- Seed data for local development
+-- Run automatically by: supabase db reset
+--
+-- Add development test data here.
+-- NEVER commit real credentials or production data.
+--
+-- Example:
+-- insert into public.profiles (id, email, company_name)
+-- values ('00000000-0000-0000-0000-000000000001', 'dev@clario.si', 'Clario Dev');
