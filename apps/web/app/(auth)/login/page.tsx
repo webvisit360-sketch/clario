@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 import { MathCaptcha } from '@clario/ui';
-import { supabase } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [captcha, setCaptcha] = useState<{ captchaId: string; answer: number } | null>(null);
 
@@ -17,101 +21,90 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     if (!captcha) {
-      setError('Prosimo, rešite varnostno vprašanje');
+      toast.error('Prosimo, rešite varnostno vprašanje');
       return;
     }
 
-    // Verify captcha first
+    // Verify captcha before auth
     try {
       const captchaRes = await fetch(`${apiUrl}/api/captcha/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: captcha.captchaId, answer: captcha.answer }),
       });
-      const captchaData = await captchaRes.json();
-      if (!captchaData.valid) {
-        setError('Napačen odgovor, poskusite znova');
+      const { valid } = await captchaRes.json();
+      if (!valid) {
+        toast.error('Napačen odgovor, poskusite znova');
         setCaptcha(null);
         return;
       }
     } catch {
-      setError('Napaka pri preverjanju captcha');
+      toast.error('Napaka pri preverjanju captcha');
       return;
     }
 
     setLoading(true);
     try {
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (authError) {
-        setError(authError.message);
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error(error.message);
         return;
       }
-
       router.push('/search');
+      router.refresh();
     } catch {
-      setError('Napaka pri prijavi');
+      toast.error('Napaka pri prijavi');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-primary flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-gray-900 rounded-xl shadow-2xl p-8">
-        <h1 className="text-3xl font-bold text-amber-400 text-center mb-2">clario.si</h1>
-        <p className="text-gray-400 text-center mb-8">Primerjava cen avtodelov</p>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center space-y-1">
+          <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
+          <CardDescription>Primerjava cen rezervnih avtodelov</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email">E-pošta</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="vas@email.si"
+                required
+                autoComplete="email"
+              />
+            </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              E-pošta
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
-              placeholder="vas@email.si"
-            />
-          </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Geslo</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Geslo
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
-              placeholder="••••••••"
-            />
-          </div>
+            <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
 
-          <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
-
-          {error && (
-            <p className="text-red-400 text-sm text-center">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-amber-800 text-white font-semibold py-2.5 rounded transition-colors"
-          >
-            {loading ? 'Prijavljanje...' : 'Prijava'}
-          </button>
-        </form>
-      </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Prijavljanje…' : 'Prijava'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

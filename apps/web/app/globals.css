@@ -2,7 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #0f0f1a;
-  color: #e5e5e5;
+@layer base {
+  :root {
+    /* Dark navy theme — maps brand colours into shadcn CSS-var system */
+    --background:           234 35% 8%;    /* #0f0f1a */
+    --foreground:           210 20% 92%;
+
+    --card:                 234 33% 12%;
+    --card-foreground:      210 20% 92%;
+
+    --popover:              234 33% 12%;
+    --popover-foreground:   210 20% 92%;
+
+    --primary:              38 80% 56%;    /* gold  #e8a838 */
+    --primary-foreground:   234 35% 8%;   /* navy text on gold */
+
+    --secondary:            234 28% 18%;
+    --secondary-foreground: 210 20% 92%;
+
+    --muted:                234 25% 20%;
+    --muted-foreground:     215 16% 55%;
+
+    --accent:               38 80% 56%;   /* gold */
+    --accent-foreground:    234 35% 8%;
+
+    --destructive:          0 65% 55%;    /* #d64444 */
+    --destructive-foreground: 210 20% 92%;
+
+    --border:               234 22% 22%;
+    --input:                234 22% 22%;
+    --ring:                 38 80% 56%;   /* gold focus ring */
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
