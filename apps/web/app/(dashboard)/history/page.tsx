@@ -58,7 +58,7 @@ export default function HistoryPage() {
                 <tr key={entry.id} className="border-b border-gray-800">
                   <td className="py-3 text-white font-mono">{entry.part_number}</td>
                   <td className="py-3 text-gray-400 text-sm">
-                    {new Date(entry.searched_at).toLocaleString('sl-SI')}
+                    {new Date(entry.searched_at).toLocaleString('en-GB')}
                   </td>
                   <td className="py-3 text-gray-400 text-sm">{entry.result_count}</td>
                   <td className="py-3">

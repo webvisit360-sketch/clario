@@ -61,7 +61,7 @@ export default function SellersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Ali ste prepričani?')) return;
+    if (!confirm('Are you sure?')) return;
     try {
       await api.delete(`/api/sellers/${id}`);
       fetchSellers();

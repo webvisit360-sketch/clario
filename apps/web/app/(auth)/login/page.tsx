@@ -23,7 +23,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!captcha) {
-      toast.error('Prosimo, rešite varnostno vprašanje');
+      toast.error('Please solve the security question');
       return;
     }
 
@@ -36,12 +36,12 @@ export default function LoginPage() {
       });
       const { valid } = await captchaRes.json();
       if (!valid) {
-        toast.error('Napačen odgovor, poskusite znova');
+        toast.error('Wrong answer, please try again');
         setCaptcha(null);
         return;
       }
     } catch {
-      toast.error('Napaka pri preverjanju captcha');
+      toast.error('Captcha verification failed');
       return;
     }
 
@@ -56,7 +56,7 @@ export default function LoginPage() {
       router.push('/search');
       router.refresh();
     } catch {
-      toast.error('Napaka pri prijavi');
+      toast.error('Login failed');
     } finally {
       setLoading(false);
     }

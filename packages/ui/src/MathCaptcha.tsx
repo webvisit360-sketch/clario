@@ -25,7 +25,7 @@ export function MathCaptcha({ apiUrl, onChange }: MathCaptchaProps) {
       setQuestion(data.question);
       setCaptchaId(data.id);
     } catch {
-      setError('Napaka pri nalaganju captcha');
+      setError('Failed to load captcha');
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export function MathCaptcha({ apiUrl, onChange }: MathCaptchaProps) {
   };
 
   const handleVerifyFailed = () => {
-    setError('Napačen odgovor, poskusite znova');
+    setError('Wrong answer, please try again');
     fetchCaptcha();
   };
 
