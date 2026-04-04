@@ -173,6 +173,13 @@ export default function RegisterPage() {
                 Prijava
               </Link>
             </p>
+
+            <p className="text-center text-xs text-muted-foreground pt-1">
+              Za registracijsko kodo pišite na{' '}
+              <a href="mailto:pi4.doo@gmail.com" className="text-primary hover:underline">
+                pi4.doo@gmail.com
+              </a>
+            </p>
           </form>
         </CardContent>
       </Card>

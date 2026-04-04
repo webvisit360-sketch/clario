@@ -48,9 +48,14 @@ export default function ForgotPasswordPage() {
                 Poslali smo vam e-pošto z navodili za ponastavitev gesla.
               </p>
               <p className="text-sm text-muted-foreground">
-                Preverite tudi mapo Nezaželena pošta.
+                Preverite tudi mapo Nezaželena pošta. Če e-pošte ne prejmete,
+                nas kontaktirajte na{' '}
+                <a href="mailto:pi4.doo@gmail.com" className="text-primary hover:underline">
+                  pi4.doo@gmail.com
+                </a>
+                .
               </p>
-              <Link href="/login" className="text-primary hover:underline text-sm">
+              <Link href="/login" className="text-primary hover:underline text-sm block">
                 Nazaj na prijavo
               </Link>
             </div>
