@@ -1,44 +1,43 @@
-const { decrypt } = require('../utils/encrypt');
-const { updateSellerSession, markLoginFailed } = require('@clario/supabase');
-const { runScraper } = require('../scrapers/base-scraper');
+import { decrypt } from '../utils/encrypt.js';
+import { updateSellerSession, markLoginFailed } from '@clario/supabase';
+import { runScraper } from '../scrapers/base-scraper.js';
+import type { Seller, SellerWithCredentials, B2BSearchResult } from '@clario/shared';
 
-// Import all B2B scrapers
-const b2bScrapers = [
-  require('../scrapers/autodoc'),
-  require('../scrapers/avtoroma'),
-  require('../scrapers/gmt'),
-  require('../scrapers/elit'),
-  require('../scrapers/euroton'),
-];
+import * as autodoc from '../scrapers/autodoc.js';
+import * as avtoroma from '../scrapers/avtoroma.js';
+import * as gmt from '../scrapers/gmt.js';
+import * as elit from '../scrapers/elit.js';
+import * as euroton from '../scrapers/euroton.js';
 
-/**
- * Find the matching scraper for a seller based on URL or name.
- */
-function findScraper(seller) {
-  return b2bScrapers.find((s) => s.matches(seller)) || null;
+interface B2BScraper {
+  shopId: string;
+  matches(seller: Seller): boolean;
+  login(page: import('playwright').Page, credentials: import('@clario/shared').ShopCredentials): Promise<boolean>;
+  search(page: import('playwright').Page, partNumber: string): Promise<import('@clario/shared').ScrapedProduct[]>;
 }
 
-/**
- * Check if a cached session is still valid.
- */
-function isSessionValid(seller) {
-  if (!seller.session_cookie || !seller.session_expires_at) return false;
+const b2bScrapers: B2BScraper[] = [autodoc, avtoroma, gmt, elit, euroton];
+
+export function findScraper(seller: Seller): B2BScraper | null {
+  return b2bScrapers.find((s) => s.matches(seller)) ?? null;
+}
+
+function isSessionValid(seller: SellerWithCredentials): boolean {
+  if (!seller.session_expires_at) return false;
   return new Date(seller.session_expires_at) > new Date();
 }
 
-/**
- * Scrape B2B shops in parallel.
- * @param {string} userId
- * @param {import('@clario/shared').SellerWithCredentials[]} sellers
- * @param {string} partNumber
- * @param {(result: import('@clario/shared').B2BSearchResult) => void} onResult
- */
-async function scrapeB2B(userId, sellers, partNumber, onResult) {
+export async function scrapeB2B(
+  userId: string,
+  sellers: SellerWithCredentials[],
+  partNumber: string,
+  onResult: (result: B2BSearchResult) => void
+): Promise<void> {
   const promises = sellers.map(async (seller) => {
     const scraper = findScraper(seller);
 
     if (!scraper) {
-      const result = {
+      const result: B2BSearchResult = {
         sellerId: seller.id,
         sellerName: seller.name,
         status: 'error',
@@ -49,34 +48,30 @@ async function scrapeB2B(userId, sellers, partNumber, onResult) {
     }
 
     try {
-      // Decrypt credentials
       const password = decrypt(seller.login_password_encrypted, seller.login_password_iv);
       const credentials = {
         username: seller.login_email,
         password,
-        sessionCookie: isSessionValid(seller) ? seller.session_cookie : null,
+        sessionCookie: isSessionValid(seller) ? (seller as any).session_cookie : null,
       };
 
-      // Run login + search in a single browser context via runScraper
       const scraperResult = await runScraper(
         async (page, creds, pn, s) => {
-          // Step 1: Login
-          const loggedIn = await scraper.login(page, creds);
+          const loggedIn = await scraper.login(page, creds as any);
           if (!loggedIn) {
             return {
               sellerId: s.id,
               sellerName: s.name,
-              status: 'login_failed',
+              status: 'login_failed' as const,
               error: 'Login failed',
             };
           }
 
-          // Save session cookies after successful login
           try {
             const context = page.context();
             const cookies = await context.cookies();
             const cookieJson = JSON.stringify(cookies);
-            const expiresAt = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(); // +4h
+            const expiresAt = new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString();
 
             await updateSellerSession(s.id, userId, {
               session_cookie: cookieJson,
@@ -84,25 +79,24 @@ async function scrapeB2B(userId, sellers, partNumber, onResult) {
               last_login_at: new Date().toISOString(),
               login_status: 'ok',
             });
-          } catch (err) {
+          } catch (err: any) {
             console.log(`[${scraper.shopId}] failed to save session:`, err.message);
           }
 
-          // Step 2: Search
-          const products = await scraper.search(page, pn);
+          const products = await scraper.search(page, pn!);
 
           if (!products || products.length === 0) {
             return {
               sellerId: s.id,
               sellerName: s.name,
-              status: 'not_found',
+              status: 'not_found' as const,
             };
           }
 
           return {
             sellerId: s.id,
             sellerName: s.name,
-            status: 'ok',
+            status: 'ok' as const,
             product: products[0],
           };
         },
@@ -115,8 +109,7 @@ async function scrapeB2B(userId, sellers, partNumber, onResult) {
         }
       );
 
-      // runScraper may return an error-shaped object from its catch block
-      const result = scraperResult.status === 'error' && scraperResult.seller_id
+      const result: B2BSearchResult = scraperResult.status === 'error' && scraperResult.seller_id
         ? {
             sellerId: scraperResult.seller_id,
             sellerName: scraperResult.seller_name,
@@ -127,15 +120,14 @@ async function scrapeB2B(userId, sellers, partNumber, onResult) {
 
       onResult(result);
       return result;
-    } catch (err) {
-      // Mark login as failed if it's an auth error
+    } catch (err: any) {
       try {
         await markLoginFailed(seller.id, userId);
       } catch {
         // Ignore DB errors here
       }
 
-      const result = {
+      const result: B2BSearchResult = {
         sellerId: seller.id,
         sellerName: seller.name,
         status: 'error',
@@ -146,8 +138,5 @@ async function scrapeB2B(userId, sellers, partNumber, onResult) {
     }
   });
 
-  // Never stop because of one shop
   await Promise.allSettled(promises);
 }
-
-module.exports = { scrapeB2B, findScraper };

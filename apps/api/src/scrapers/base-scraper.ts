@@ -1,16 +1,29 @@
-const { chromium } = require('playwright');
+import { chromium, type Browser, type Page } from 'playwright';
+import type { Seller, SearchResult } from '@clario/shared';
 
-let localBrowser = null;
-let brightDataBrowser = null;
+export interface ScraperOptions {
+  timeout?: number;
+  sessionCookie?: string | null;
+}
 
-async function getLocalBrowser() {
+export type ScraperFn = (
+  page: Page,
+  credentials: unknown,
+  partNumber: string | null,
+  seller: Seller
+) => Promise<unknown>;
+
+let localBrowser: Browser | null = null;
+let brightDataBrowser: Browser | null = null;
+
+async function getLocalBrowser(): Promise<Browser> {
   if (!localBrowser || !localBrowser.isConnected()) {
     localBrowser = await chromium.launch({ headless: true });
   }
   return localBrowser;
 }
 
-async function getBrightDataBrowser() {
+async function getBrightDataBrowser(): Promise<Browser> {
   if (!brightDataBrowser || !brightDataBrowser.isConnected()) {
     const wss = process.env.BRIGHT_DATA_WSS;
     if (!wss) throw new Error('BRIGHT_DATA_WSS not configured');
@@ -19,14 +32,20 @@ async function getBrightDataBrowser() {
   return brightDataBrowser;
 }
 
-async function getBrowser() {
+export async function getBrowser(): Promise<Browser> {
   if (process.env.BRIGHT_DATA_WSS) {
     return getBrightDataBrowser();
   }
   return getLocalBrowser();
 }
 
-async function runScraper(fn, credentials, partNumber, seller, options = {}) {
+export async function runScraper(
+  fn: ScraperFn,
+  credentials: unknown,
+  partNumber: string | null,
+  seller: Seller,
+  options: ScraperOptions = {}
+): Promise<any> {
   const timeout = options.timeout || 20000;
   const browser = await getBrowser();
   const context = await browser.newContext();
@@ -46,7 +65,7 @@ async function runScraper(fn, credentials, partNumber, seller, options = {}) {
 
   let retried = false;
 
-  async function attempt() {
+  async function attempt(): Promise<any> {
     try {
       const result = await Promise.race([
         fn(page, credentials, partNumber, seller),
@@ -55,7 +74,7 @@ async function runScraper(fn, credentials, partNumber, seller, options = {}) {
         ),
       ]);
       return result;
-    } catch (err) {
+    } catch (err: any) {
       // Retry once on network errors
       if (!retried && err.message && (err.message.includes('net::') || err.message.includes('Navigation timeout'))) {
         retried = true;
@@ -69,11 +88,11 @@ async function runScraper(fn, credentials, partNumber, seller, options = {}) {
         stock_qty: null,
         availability: '',
         image_url: null,
-        part_number_found: partNumber,
+        part_number_found: partNumber ?? '',
         add_to_cart_url: null,
         status: 'error',
         error: err.message,
-      };
+      } satisfies SearchResult & { seller_id: string; seller_name: string };
     }
   }
 
@@ -84,7 +103,7 @@ async function runScraper(fn, credentials, partNumber, seller, options = {}) {
   }
 }
 
-async function closeBrowser() {
+export async function closeBrowser(): Promise<void> {
   if (localBrowser) {
     await localBrowser.close();
     localBrowser = null;
@@ -94,5 +113,3 @@ async function closeBrowser() {
     brightDataBrowser = null;
   }
 }
-
-module.exports = { getBrowser, runScraper, closeBrowser };
