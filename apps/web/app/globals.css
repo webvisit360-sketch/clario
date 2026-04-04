@@ -4,34 +4,34 @@
 
 @layer base {
   :root {
-    /* Drone.io-inspired — cool dark + cyan accent, high contrast */
-    --background:           240 18% 5%;    /* #0b0b10 near-black */
-    --foreground:           210 18% 94%;   /* #eef0f4 near-white */
+    /* Drone.io-inspired light theme — off-white bg + deep cyan/blue accent */
+    --background:           210 30% 96%;   /* #eef3f8 light blue-gray */
+    --foreground:           220 28% 8%;    /* #0d1018 near-black */
 
-    --card:                 240 16% 9%;    /* #121219 dark panel */
-    --card-foreground:      210 18% 94%;
+    --card:                 0 0% 100%;     /* #ffffff white cards */
+    --card-foreground:      220 28% 8%;
 
-    --popover:              240 16% 9%;
-    --popover-foreground:   210 18% 94%;
+    --popover:              0 0% 100%;
+    --popover-foreground:   220 28% 8%;
 
-    --primary:              197 100% 48%; /* #00aee6 — brighter than drone's #00ade4 */
-    --primary-foreground:   240 18% 5%;   /* dark text on cyan */
+    --primary:              202 100% 40%;  /* #0082cc deep cyan-blue */
+    --primary-foreground:   0 0% 100%;    /* white text on blue */
 
-    --secondary:            240 14% 16%;  /* #1e1e28 */
-    --secondary-foreground: 210 18% 94%;
+    --secondary:            210 22% 92%;   /* #e4eaf1 light panel */
+    --secondary-foreground: 220 28% 8%;
 
-    --muted:                240 12% 19%;  /* #272732 */
-    --muted-foreground:     237 14% 60%;  /* #8d8fa8 */
+    --muted:                210 20% 91%;   /* #e2e8f0 */
+    --muted-foreground:     220 12% 44%;   /* #636b7d mid-gray */
 
-    --accent:               197 100% 48%;
-    --accent-foreground:    240 18% 5%;
+    --accent:               202 100% 40%;
+    --accent-foreground:    0 0% 100%;
 
-    --destructive:          4 82% 56%;    /* #f0372a brighter red */
-    --destructive-foreground: 210 18% 94%;
+    --destructive:          4 82% 50%;    /* #e8301f red */
+    --destructive-foreground: 0 0% 100%;
 
-    --border:               240 14% 18%;  /* #232330 */
-    --input:                240 14% 18%;
-    --ring:                 197 100% 48%; /* cyan focus ring */
+    --border:               210 20% 84%;  /* #ccd5e0 light border */
+    --input:                210 20% 88%;
+    --ring:                 202 100% 40%; /* blue focus ring */
 
     --radius: 0.5rem;
   }
