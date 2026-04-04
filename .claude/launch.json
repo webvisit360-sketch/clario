@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "All (Turbo)",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH exec pnpm dev"],
+      "port": 3000
+    },
+    {
+      "name": "Web (Next.js)",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH exec pnpm --filter @clario/web dev"],
+      "port": 3000
+    },
+    {
+      "name": "API (Express)",
+      "runtimeExecutable": "/bin/sh",
+      "runtimeArgs": ["-c", "PATH=/opt/homebrew/bin:/usr/local/bin:$PATH exec pnpm --filter @clario/api dev"],
+      "port": 3001
+    }
+  ]
+}
