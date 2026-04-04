@@ -11,10 +11,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [registerCode, setRegisterCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [captcha, setCaptcha] = useState<{ captchaId: string; answer: number } | null>(null);
 
@@ -23,12 +26,20 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
     if (!captcha) {
       toast.error('Please solve the security question');
       return;
     }
 
-    // Verify captcha before auth
+    // Verify captcha
     try {
       const captchaRes = await fetch(`${apiUrl}/api/captcha/verify`, {
         method: 'POST',
@@ -46,18 +57,33 @@ export default function LoginPage() {
       return;
     }
 
+    // Verify registration code
+    if (registerCode !== process.env.NEXT_PUBLIC_REGISTER_SECRET) {
+      toast.error('Invalid registration code');
+      return;
+    }
+
     setLoading(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         toast.error(error.message);
         return;
       }
-      router.push('/search');
-      router.refresh();
+
+      // Update profile with company name
+      if (data.user) {
+        await supabase
+          .from('profiles')
+          .update({ company_name: companyName })
+          .eq('id', data.user.id);
+      }
+
+      toast.success('Account created — you can now log in');
+      router.push('/login');
     } catch {
-      toast.error('Login failed');
+      toast.error('Registration failed');
     } finally {
       setLoading(false);
     }
@@ -68,7 +94,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
-          <CardDescription>Primerjava cen rezervnih avtodelov</CardDescription>
+          <CardDescription>Ustvarite nov račun</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -86,32 +112,67 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
+              <Label htmlFor="company">Ime podjetja</Label>
+              <Input
+                id="company"
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="Vaše podjetje d.o.o."
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
               <Label htmlFor="password">Geslo</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Najmanj 8 znakov"
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="confirmPassword">Potrdi geslo</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ponovi geslo"
+                required
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="registerCode">Registracijska koda</Label>
+              <Input
+                id="registerCode"
+                type="text"
+                value={registerCode}
+                onChange={(e) => setRegisterCode(e.target.value)}
+                placeholder="Koda, ki ste jo prejeli"
+                required
               />
             </div>
 
             <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Prijavljanje…' : 'Prijava'}
+            <Button type="submit" className="w-full" disabled={loading || !captcha}>
+              {loading ? 'Registracija…' : 'Ustvari račun'}
             </Button>
 
-            <div className="flex justify-between text-sm text-muted-foreground pt-1">
-              <Link href="/forgot-password" className="text-primary hover:underline">
-                Pozabljeno geslo?
+            <p className="text-center text-sm text-muted-foreground">
+              Že imate račun?{' '}
+              <Link href="/login" className="text-primary hover:underline">
+                Prijava
               </Link>
-              <Link href="/register" className="text-primary hover:underline">
-                Ustvari račun
-              </Link>
-            </div>
+            </p>
           </form>
         </CardContent>
       </Card>
