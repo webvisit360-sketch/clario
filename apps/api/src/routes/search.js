@@ -1,9 +1,10 @@
 const { Router } = require('express');
 const requireAuth = require('../middleware/requireAuth');
 const { decrypt } = require('../utils/encrypt');
-const { getSellers, saveSearch } = require('@clario/supabase');
+const { getSellers, getSellersWithCredentials, saveSearch } = require('@clario/supabase');
+const { scrapeB2B } = require('../services/brightDataService');
 
-// Import all scrapers
+// Import all scrapers (legacy, for existing GET /api/search)
 const scrapers = {
   intercars: require('../scrapers/intercars'),
   elit: require('../scrapers/elit'),
@@ -118,6 +119,47 @@ router.get('/', async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+});
+
+// GET /api/search/b2b-stream?q=PART_NUMBER — SSE endpoint for B2B streaming
+router.get('/b2b-stream', async (req, res, next) => {
+  const partNumber = req.query.q;
+  if (!partNumber || typeof partNumber !== 'string') {
+    return res.status(400).json({ error: 'Missing query parameter: q' });
+  }
+
+  try {
+    const sellers = await getSellersWithCredentials(req.user.id);
+
+    if (sellers.length === 0) {
+      return res.status(404).json({ error: 'No active sellers configured' });
+    }
+
+    // Set SSE headers
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+
+    let successful = 0;
+
+    await scrapeB2B(req.user.id, sellers, partNumber, (result) => {
+      if (result.status === 'ok') successful++;
+      res.write(`data: ${JSON.stringify({ type: 'result', ...result })}\n\n`);
+    });
+
+    res.write(`data: ${JSON.stringify({ type: 'done', totalShops: sellers.length, successful })}\n\n`);
+    res.end();
+  } catch (err) {
+    // If headers already sent, can't send JSON error
+    if (res.headersSent) {
+      res.write(`data: ${JSON.stringify({ type: 'result', sellerId: null, sellerName: null, status: 'error', error: err.message })}\n\n`);
+      res.end();
+    } else {
+      next(err);
+    }
   }
 });
 
