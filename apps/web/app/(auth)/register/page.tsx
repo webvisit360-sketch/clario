@@ -17,7 +17,6 @@ export default function RegisterPage() {
   const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [registerCode, setRegisterCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [captcha, setCaptcha] = useState<{ captchaId: string; answer: number } | null>(null);
 
@@ -54,12 +53,6 @@ export default function RegisterPage() {
       }
     } catch {
       toast.error('Captcha verification failed');
-      return;
-    }
-
-    // Verify registration code
-    if (registerCode !== process.env.NEXT_PUBLIC_REGISTER_SECRET) {
-      toast.error('Invalid registration code');
       return;
     }
 
@@ -149,18 +142,6 @@ export default function RegisterPage() {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="registerCode">Registracijska koda</Label>
-              <Input
-                id="registerCode"
-                type="text"
-                value={registerCode}
-                onChange={(e) => setRegisterCode(e.target.value)}
-                placeholder="Koda, ki ste jo prejeli"
-                required
-              />
-            </div>
-
             <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
 
             <Button type="submit" className="w-full" disabled={loading || !captcha}>
@@ -174,12 +155,6 @@ export default function RegisterPage() {
               </Link>
             </p>
 
-            <p className="text-center text-xs text-muted-foreground pt-1">
-              Za registracijsko kodo pišite na{' '}
-              <a href="mailto:pi4.doo@gmail.com" className="text-primary hover:underline">
-                pi4.doo@gmail.com
-              </a>
-            </p>
           </form>
         </CardContent>
       </Card>
