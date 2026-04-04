@@ -1,13 +1,17 @@
 const { Router } = require('express');
 const { body, validationResult } = require('express-validator');
 const requireAuth = require('../middleware/requireAuth');
-const { encrypt } = require('../utils/encrypt');
+const { encrypt, decrypt } = require('../utils/encrypt');
 const {
   getSellers,
   createSeller,
   updateSeller,
   deleteSeller,
+  updateSellerSession,
+  markLoginFailed,
 } = require('@clario/supabase');
+const { runScraper } = require('../scrapers/base-scraper');
+const { findScraper } = require('../services/brightDataService');
 
 const router = Router();
 
@@ -88,6 +92,65 @@ router.delete('/:id', async (req, res, next) => {
   try {
     await deleteSeller(req.params.id, req.user.id);
     res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/sellers/:id/test — Test login for a specific seller
+router.post('/:id/test', async (req, res, next) => {
+  try {
+    // Get seller with credentials from DB
+    const { data: seller, error } = await require('@clario/supabase')
+      .serverClient.from('sellers')
+      .select('*')
+      .eq('id', req.params.id)
+      .eq('user_id', req.user.id)
+      .single();
+
+    if (error || !seller) {
+      return res.status(404).json({ error: 'Seller not found' });
+    }
+
+    const scraper = findScraper(seller);
+    if (!scraper) {
+      return res.status(400).json({ error: 'No scraper implemented for this seller' });
+    }
+
+    const password = decrypt(seller.login_password_encrypted, seller.login_password_iv);
+    const credentials = {
+      username: seller.login_email,
+      password,
+      sessionCookie: null,
+    };
+
+    const result = await runScraper(
+      async (page, creds) => {
+        const success = await scraper.login(page, creds);
+        return { success };
+      },
+      credentials,
+      null,
+      seller,
+      { timeout: 15000 }
+    );
+
+    const loginSuccess = result.success === true;
+    const loginStatus = loginSuccess ? 'ok' : 'failed';
+    const testedAt = new Date().toISOString();
+
+    if (loginSuccess) {
+      await updateSellerSession(seller.id, req.user.id, {
+        session_cookie: '',
+        session_expires_at: new Date(Date.now() + 4 * 60 * 60 * 1000).toISOString(),
+        last_login_at: testedAt,
+        login_status: 'ok',
+      });
+    } else {
+      await markLoginFailed(seller.id, req.user.id);
+    }
+
+    res.json({ success: loginSuccess, login_status: loginStatus, tested_at: testedAt });
   } catch (err) {
     next(err);
   }

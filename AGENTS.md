@@ -200,66 +200,41 @@ CSS variables are defined in `globals.css`. Use semantic tokens in new code:
 | `JWT_SECRET` | api | Fallback JWT validation |
 | `CORS_ORIGIN` | api | Allowed origin (Next.js URL) |
 | `API_PORT` | api | Express port (default 3001) |
+| `BRIGHT_DATA_WSS` | api | Bright Data Scraping Browser WebSocket endpoint |
+| `BRIGHT_DATA_ZONE` | api | Bright Data zone name |
+| `APP_SECRET` | api | 32-char secret for session tokens |
 
 **Never commit `.env`**. Copy `.env.example` → `.env` and fill in values.
 
 ---
 
-## Scraping Framework Recommendation
+## Scraping Architecture — Bright Data + Playwright
 
-**Use [Crawlee](https://crawlee.dev) (by Apify) as the scraping framework.**
+**B2B scraping uses Playwright with Bright Data Scraping Browser for production anti-bot bypass.**
 
-### Why Crawlee over raw Playwright
-| Feature | Raw Playwright | Crawlee + Playwright |
-|---------|---------------|---------------------|
-| Request queue | Manual | Built-in, persistent |
-| Auto-retry on failure | Manual | Built-in (configurable) |
-| Session rotation | Manual | `SessionPool` built-in |
-| Anti-bot fingerprint spoofing | Manual | Built-in via `PlaywrightCrawler` |
-| Proxy rotation | Manual | Built-in |
-| Rate limiting / politeness | Manual | Built-in |
-| Concurrent scraper management | Manual | Built-in |
+### How it works
+- **Local dev:** Playwright launches a local headless Chromium (no Bright Data needed)
+- **Production:** If `BRIGHT_DATA_WSS` is set, Playwright connects via CDP to Bright Data's Scraping Browser
+- **Session caching:** Login cookies are stored in `sellers.session_cookie` (encrypted at rest in DB) and reused for 4 hours
 
-### Installation (in `apps/api`)
-```bash
-pnpm add crawlee playwright
+### Scraper interface (ShopScraper)
+Each scraper in `apps/api/src/scrapers/` exports:
+- `shopId` — identifier string
+- `matches(seller)` — returns true if this scraper handles the seller
+- `login(page, credentials)` — returns boolean (never throws)
+- `search(page, partNumber)` — returns `ScrapedProduct[]` (empty = not found)
+- `scrape(credentials, partNumber, seller)` — legacy compatibility for existing search endpoint
+
+### B2B SSE streaming
+The `GET /api/search/b2b-stream?q=PART_NUMBER` endpoint streams results via Server-Sent Events:
+```
+data: {"type":"result","sellerId":"...","sellerName":"Autodoc","status":"ok","product":{...}}
+data: {"type":"result","sellerId":"...","sellerName":"Avtoroma","status":"not_found"}
+data: {"type":"done","totalShops":5,"successful":2}
 ```
 
-### Scraper pattern with Crawlee
-```js
-import { PlaywrightCrawler } from 'crawlee';
-
-export default async function scrape(credentials, partNumber) {
-  let result = { status: 'not_found', ... };
-
-  const crawler = new PlaywrightCrawler({
-    maxRequestsPerCrawl: 1,
-    requestHandlerTimeoutSecs: 12,
-    async requestHandler({ page }) {
-      // 1. Login
-      await page.fill('#email', credentials.login_email);
-      await page.fill('#password', credentials.login_password);
-      await page.click('[type=submit]');
-
-      // 2. Search
-      await page.fill('.search-input', partNumber);
-      await page.click('.search-btn');
-
-      // 3. Scrape
-      const price = await page.$eval('.price', el => parseFloat(el.textContent));
-      result = { status: 'ok', price_net: price, currency: 'EUR', ... };
-    },
-  });
-
-  await crawler.run([credentials.url]);
-  return result;
-}
-```
-
-### Recommended Crawlee packages
-- `crawlee` — core + `PlaywrightCrawler`
-- Keep `playwright` as the browser engine (already a dep)
-- Optional: `@crawlee/memory-storage` for local dev queue persistence
+### Testing a seller's login
+`POST /api/sellers/:id/test` — tests login credentials and updates `login_status` in DB
 
 ---
 
