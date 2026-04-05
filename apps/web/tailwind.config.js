@@ -9,51 +9,103 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-sans)'],
+      },
+      fontSize: {
+        // Analog design system — base sizes
+        'xs':   ['12px', { lineHeight: '16px' }],
+        'sm':   ['14px', { lineHeight: '20px' }],
+        'base': ['16px', { lineHeight: '24px' }],
+        'lg':   ['18px', { lineHeight: '24px' }],
+        'xl':   ['20px', { lineHeight: '28px' }],
+        '2xl':  ['24px', { lineHeight: '36px' }],
+        '3xl':  ['28px', { lineHeight: '28px' }],
+        '4xl':  ['30px', { lineHeight: '36px' }],
+        '5xl':  ['32px', { lineHeight: '40px' }],
+        '6xl':  ['36px', { lineHeight: '36px' }],
+        '7xl':  ['40px', { lineHeight: '40px' }],
+        '8xl':  ['48px', { lineHeight: '1.2' }],
+        '9xl':  ['64px', { lineHeight: '1.2' }],
+      },
       colors: {
-        // Brand identity — use brand-primary, brand-accent etc. in new code
-        brand: {
-          primary: '#eef3f8',
-          accent:  '#0082cc',
-          success: '#3aad50',
-          danger:  '#e8301f',
+        // Analog design system — neutral gray scale
+        neutral: {
+          50:  'var(--neutral-50)',
+          75:  'var(--neutral-75)',
+          100: 'var(--neutral-100)',
+          150: 'var(--neutral-150)',
+          200: 'var(--neutral-200)',
+          300: 'var(--neutral-300)',
+          400: 'var(--neutral-400)',
+          500: 'var(--neutral-500)',
+          600: 'var(--neutral-600)',
+          700: 'var(--neutral-700)',
+          800: 'var(--neutral-800)',
+          850: 'var(--neutral-850)',
+          900: 'var(--neutral-900)',
+          950: 'var(--neutral-950)',
         },
         // shadcn/ui CSS-variable tokens
-        background:  'hsl(var(--background))',
-        foreground:  'hsl(var(--foreground))',
+        background: {
+          DEFAULT: 'var(--background)',
+          top:     'var(--background-top)',
+          bottom:  'var(--background-bottom)',
+        },
+        foreground:  'var(--foreground)',
         card: {
-          DEFAULT:    'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT:    'var(--card)',
+          foreground: 'var(--card-foreground)',
         },
         popover: {
-          DEFAULT:    'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
+          DEFAULT:    'var(--popover)',
+          foreground: 'var(--popover-foreground)',
         },
         primary: {
-          DEFAULT:    'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT:    'var(--primary)',
+          foreground: 'var(--primary-foreground)',
         },
         secondary: {
-          DEFAULT:    'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT:    'var(--secondary)',
+          foreground: 'var(--secondary-foreground)',
         },
         muted: {
-          DEFAULT:    'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
+          DEFAULT:    'var(--muted)',
+          foreground: 'var(--muted-foreground)',
+          'foreground-2': 'var(--muted-foreground-2)',
         },
         accent: {
-          DEFAULT:    'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
+          DEFAULT:    'var(--accent)',
+          foreground: 'var(--accent-foreground)',
+          border:     'var(--accent-border)',
         },
         destructive: {
-          DEFAULT:    'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
+          DEFAULT:    'var(--destructive)',
+          foreground: 'var(--destructive-foreground)',
         },
-        border:  'hsl(var(--border))',
-        input:   'hsl(var(--input))',
-        ring:    'hsl(var(--ring))',
-        // Standalone aliases kept for legacy usage
-        success: '#3aad50',
-        danger:  '#e8301f',
+        border:  'var(--border)',
+        input:   'var(--input)',
+        ring:    'var(--ring)',
+        // Semantic tokens
+        tag: {
+          DEFAULT:    'var(--tag)',
+          foreground: 'var(--tag-foreground)',
+        },
+        sheet: {
+          DEFAULT:    'var(--sheet)',
+          border:     'var(--sheet-border)',
+        },
+        button: {
+          DEFAULT:    'var(--button)',
+          border:     'var(--button-border)',
+        },
+        checkbox: {
+          DEFAULT:    'var(--checkbox)',
+          border:     'var(--checkbox-border)',
+        },
+        brand: {
+          orange: 'var(--brand-orange)',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',

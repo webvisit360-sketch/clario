@@ -64,7 +64,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
+      <Link
+        href="/"
+        className="absolute top-6 left-6 text-lg font-extrabold text-foreground hover:opacity-80 transition-opacity"
+      >
+        clario<span className="text-muted-foreground">.si</span>
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
