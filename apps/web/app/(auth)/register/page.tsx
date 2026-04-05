@@ -11,10 +11,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [captcha, setCaptcha] = useState<{ captchaId: string; answer: number } | null>(null);
 
@@ -23,12 +25,22 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (password.length < 8) {
+      toast.error('Geslo mora imeti vsaj 8 znakov');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error('Gesli se ne ujemata');
+      return;
+    }
+
     if (!captcha) {
       toast.error('Prosimo, rešite varnostno vprašanje');
       return;
     }
 
-    // Verify captcha before auth
+    // Verify captcha
     try {
       const captchaRes = await fetch(`${apiUrl}/api/captcha/verify`, {
         method: 'POST',
@@ -49,15 +61,31 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { company_name: companyName },
+        },
+      });
+
       if (error) {
         toast.error(error.message);
         return;
       }
-      router.push('/search');
-      router.refresh();
+
+      // Update profile with company name (trigger creates the row, we update it)
+      if (data.user) {
+        await supabase
+          .from('profiles')
+          .update({ company_name: companyName })
+          .eq('id', data.user.id);
+      }
+
+      toast.success('Registracija uspešna! Prijavite se.');
+      router.push('/login');
     } catch {
-      toast.error('Napaka pri prijavi');
+      toast.error('Napaka pri registraciji');
     } finally {
       setLoading(false);
     }
@@ -68,7 +96,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
-          <CardDescription>Primerjava cen rezervnih avtodelov</CardDescription>
+          <CardDescription>Ustvarite nov račun</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -86,36 +114,58 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1.5">
+              <Label htmlFor="company">Ime podjetja</Label>
+              <Input
+                id="company"
+                type="text"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                placeholder="Vaše podjetje d.o.o."
+                required
+              />
+            </div>
+
+            <div className="space-y-1.5">
               <Label htmlFor="password">Geslo</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Najmanj 8 znakov"
+                required
+                minLength={8}
+                autoComplete="new-password"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="confirmPassword">Potrdi geslo</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                autoComplete="current-password"
+                minLength={8}
+                autoComplete="new-password"
               />
             </div>
 
             <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Prijavljanje…' : 'Prijava'}
+              {loading ? 'Registracija...' : 'Ustvari račun'}
             </Button>
           </form>
 
-          <div className="mt-4 space-y-2 text-center text-sm">
-            <Link href="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors block">
-              Pozabljeno geslo?
+          <p className="mt-4 text-center text-sm text-muted-foreground">
+            Že imate račun?{' '}
+            <Link href="/login" className="text-primary hover:underline">
+              Prijava
             </Link>
-            <p className="text-muted-foreground">
-              Nimate računa?{' '}
-              <Link href="/register" className="text-primary hover:underline">
-                Ustvari račun
-              </Link>
-            </p>
-          </div>
+          </p>
         </CardContent>
       </Card>
     </div>

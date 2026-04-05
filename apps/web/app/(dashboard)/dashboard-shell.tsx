@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@clario/ui';
-import { supabase } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 
 export default function DashboardShell({
   companyName,
@@ -15,8 +15,10 @@ export default function DashboardShell({
   const router = useRouter();
 
   const handleLogout = async () => {
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/login');
+    router.refresh();
   };
 
   return (

@@ -28,7 +28,8 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isAuthRoute = pathname.startsWith('/login');
+  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
+  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
   const isPublicAsset = /\.(svg|png|jpg|jpeg|gif|webp|ico|css|js)$/.test(pathname);
 
   if (!user && !isAuthRoute && !isPublicAsset) {
