@@ -6,6 +6,7 @@ import { SellerCard } from '@clario/ui';
 import { api } from '@/lib/api';
 import { EmptyState } from '@/components/empty-state';
 import type { SearchResponse, SearchResult } from '@clario/shared';
+import { BackButton } from '@/components/ui/back-button';
 
 export default function SearchPage() {
   const searchParams = useSearchParams();
@@ -46,7 +47,8 @@ export default function SearchPage() {
   };
 
   return (
-    <div>
+    <div className="relative">
+      <BackButton />
       <h1 className="text-2xl font-bold text-foreground mb-6">Iskanje delov</h1>
 
       <form onSubmit={handleSearch} className="flex gap-3 mb-8">
