@@ -33,7 +33,6 @@ export default function SellersPage() {
   const onSubmit = async (data: SellerCreateInput) => {
     if (!captcha) return;
 
-    // Verify captcha
     try {
       const res = await fetch(`${apiUrl}/api/captcha/verify`, {
         method: 'POST',
@@ -79,13 +78,15 @@ export default function SellersPage() {
     }
   };
 
+  const inputClass = 'w-full px-3 py-2 bg-background border border-border rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm';
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Prodajalci</h1>
+        <h1 className="text-2xl font-bold text-foreground">Prodajalci</h1>
         <button
           onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-medium rounded transition-colors"
+          className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors shadow-sm"
         >
           Dodaj prodajalca
         </button>
@@ -94,41 +95,41 @@ export default function SellersPage() {
       {loading ? (
         <div className="animate-pulse space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-16 bg-gray-800 rounded" />
+            <div key={i} className="h-16 bg-muted rounded" />
           ))}
         </div>
       ) : sellers.length === 0 ? (
-        <p className="text-gray-400 text-center py-12">
+        <p className="text-muted-foreground text-center py-12">
           Še nimate dodanih prodajalcev
         </p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-gray-700">
-                <th className="pb-3 text-gray-400 text-sm font-medium">Ime</th>
-                <th className="pb-3 text-gray-400 text-sm font-medium">URL</th>
-                <th className="pb-3 text-gray-400 text-sm font-medium">E-pošta</th>
-                <th className="pb-3 text-gray-400 text-sm font-medium">Aktiven</th>
-                <th className="pb-3 text-gray-400 text-sm font-medium">Dejanja</th>
+              <tr className="border-b border-border bg-secondary">
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">Ime</th>
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">URL</th>
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">E-pošta</th>
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">Aktiven</th>
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">Dejanja</th>
               </tr>
             </thead>
             <tbody>
-              {sellers.map((seller) => (
-                <tr key={seller.id} className="border-b border-gray-800">
-                  <td className="py-3 text-white">{seller.name}</td>
-                  <td className="py-3 text-gray-400 text-sm">{seller.url}</td>
-                  <td className="py-3 text-gray-400 text-sm">{seller.login_email}</td>
-                  <td className="py-3">
+              {sellers.map((seller, i) => (
+                <tr key={seller.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? '' : 'bg-secondary/40'}`}>
+                  <td className="px-4 py-3 text-foreground font-medium">{seller.name}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-sm">{seller.url}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-sm">{seller.login_email}</td>
+                  <td className="px-4 py-3">
                     <button
                       onClick={() => toggleActive(seller)}
-                      className={`w-3 h-3 rounded-full ${seller.active ? 'bg-green-500' : 'bg-red-500'}`}
+                      className={`w-3 h-3 rounded-full ${seller.active ? 'bg-green-500' : 'bg-red-400'}`}
                     />
                   </td>
-                  <td className="py-3">
+                  <td className="px-4 py-3">
                     <button
                       onClick={() => handleDelete(seller.id)}
-                      className="text-red-400 hover:text-red-300 text-sm"
+                      className="text-destructive hover:text-destructive/80 text-sm font-medium transition-colors"
                     >
                       Izbriši
                     </button>
@@ -141,46 +142,29 @@ export default function SellersPage() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-gray-900 rounded-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold text-white mb-4">Dodaj prodajalca</h2>
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 px-4">
+          <div className="bg-card rounded-xl p-6 w-full max-w-md border border-border shadow-xl">
+            <h2 className="text-xl font-bold text-foreground mb-4">Dodaj prodajalca</h2>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1">Ime</label>
-                <input
-                  {...register('name', { required: true })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-amber-500"
-                />
+                <label className="block text-sm font-medium text-foreground mb-1">Ime</label>
+                <input {...register('name', { required: true })} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1">URL</label>
-                <input
-                  {...register('url', { required: true })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-amber-500"
-                />
+                <label className="block text-sm font-medium text-foreground mb-1">URL</label>
+                <input {...register('url', { required: true })} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1">E-pošta za prijavo</label>
-                <input
-                  type="email"
-                  {...register('login_email', { required: true })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-amber-500"
-                />
+                <label className="block text-sm font-medium text-foreground mb-1">E-pošta za prijavo</label>
+                <input type="email" {...register('login_email', { required: true })} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1">Geslo za prijavo</label>
-                <input
-                  type="password"
-                  {...register('login_password', { required: true })}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-amber-500"
-                />
+                <label className="block text-sm font-medium text-foreground mb-1">Geslo za prijavo</label>
+                <input type="password" {...register('login_password', { required: true })} className={inputClass} />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1">Opombe</label>
-                <input
-                  {...register('notes')}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white focus:outline-none focus:border-amber-500"
-                />
+                <label className="block text-sm font-medium text-foreground mb-1">Opombe</label>
+                <input {...register('notes')} className={inputClass} />
               </div>
 
               <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
@@ -189,14 +173,14 @@ export default function SellersPage() {
                 <button
                   type="button"
                   onClick={() => { setShowModal(false); reset(); }}
-                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded hover:bg-gray-800 transition-colors"
+                  className="flex-1 px-4 py-2 border border-border text-foreground rounded-lg hover:bg-secondary transition-colors font-medium"
                 >
                   Prekliči
                 </button>
                 <button
                   type="submit"
                   disabled={!captcha}
-                  className="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-amber-800 text-white font-medium rounded transition-colors"
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium rounded-lg transition-colors"
                 >
                   Shrani
                 </button>

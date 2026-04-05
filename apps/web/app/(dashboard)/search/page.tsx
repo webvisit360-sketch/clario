@@ -33,7 +33,7 @@ export default function SearchPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6">Iskanje delov</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Iskanje delov</h1>
 
       <form onSubmit={handleSearch} className="flex gap-3 mb-8">
         <input
@@ -41,12 +41,12 @@ export default function SearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Vnesite številko dela (npr. 1K0615301AC)"
-          className="flex-1 px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+          className="flex-1 px-4 py-3 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
         />
         <button
           type="submit"
           disabled={loading}
-          className="px-6 py-3 bg-amber-600 hover:bg-amber-500 disabled:bg-amber-800 text-white font-semibold rounded-lg transition-colors"
+          className="px-6 py-3 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-semibold rounded-lg transition-colors shadow-sm"
         >
           {loading ? 'Iskanje...' : 'Išči'}
         </button>
@@ -84,8 +84,8 @@ export default function SearchPage() {
 
       {!loading && searched && results.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">Ni rezultatov za iskanje</p>
-          <p className="text-gray-500 text-sm mt-2">
+          <p className="text-muted-foreground text-lg">Ni rezultatov za iskanje</p>
+          <p className="text-muted-foreground text-sm mt-2">
             Preverite številko dela ali dodajte prodajalce
           </p>
         </div>

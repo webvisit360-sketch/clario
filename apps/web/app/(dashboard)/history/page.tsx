@@ -30,41 +30,41 @@ export default function HistoryPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6">Zgodovina iskanj</h1>
+      <h1 className="text-2xl font-bold text-foreground mb-6">Zgodovina iskanj</h1>
 
       {loading ? (
         <div className="animate-pulse space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-12 bg-gray-800 rounded" />
+            <div key={i} className="h-12 bg-muted rounded" />
           ))}
         </div>
       ) : history.length === 0 ? (
-        <p className="text-gray-400 text-center py-12">
+        <p className="text-muted-foreground text-center py-12">
           Še nimate iskanj v zgodovini
         </p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-gray-700">
-                <th className="pb-3 text-gray-400 text-sm font-medium">Številka dela</th>
-                <th className="pb-3 text-gray-400 text-sm font-medium">Datum</th>
-                <th className="pb-3 text-gray-400 text-sm font-medium">Rezultati</th>
-                <th className="pb-3 text-gray-400 text-sm font-medium"></th>
+              <tr className="border-b border-border bg-secondary">
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">Številka dela</th>
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">Datum</th>
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium">Rezultati</th>
+                <th className="px-4 py-3 text-muted-foreground text-sm font-medium"></th>
               </tr>
             </thead>
             <tbody>
-              {history.map((entry) => (
-                <tr key={entry.id} className="border-b border-gray-800">
-                  <td className="py-3 text-white font-mono">{entry.part_number}</td>
-                  <td className="py-3 text-gray-400 text-sm">
+              {history.map((entry, i) => (
+                <tr key={entry.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? '' : 'bg-secondary/40'}`}>
+                  <td className="px-4 py-3 text-foreground font-mono font-medium">{entry.part_number}</td>
+                  <td className="px-4 py-3 text-muted-foreground text-sm">
                     {new Date(entry.searched_at).toLocaleString('en-GB')}
                   </td>
-                  <td className="py-3 text-gray-400 text-sm">{entry.result_count}</td>
-                  <td className="py-3">
+                  <td className="px-4 py-3 text-muted-foreground text-sm">{entry.result_count}</td>
+                  <td className="px-4 py-3">
                     <button
                       onClick={() => handleRepeat(entry.part_number)}
-                      className="text-amber-400 hover:text-amber-300 text-sm"
+                      className="text-primary hover:text-primary/80 text-sm font-medium transition-colors"
                     >
                       Ponovi iskanje
                     </button>
