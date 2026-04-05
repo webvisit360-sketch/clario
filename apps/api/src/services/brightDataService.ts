@@ -31,7 +31,8 @@ export async function scrapeB2B(
   userId: string,
   sellers: SellerWithCredentials[],
   partNumber: string,
-  onResult: (result: B2BSearchResult) => void
+  onResult: (result: B2BSearchResult) => void,
+  crossReferences: string[] = []
 ): Promise<void> {
   const promises = sellers.map(async (seller) => {
     const scraper = findScraper(seller);
@@ -83,7 +84,17 @@ export async function scrapeB2B(
             console.log(`[${scraper.shopId}] failed to save session:`, err.message);
           }
 
-          const products = await scraper.search(page, pn!);
+          // Try original part number first
+          let products = await scraper.search(page, pn!);
+
+          // If not found and cross-references are available, try alternatives
+          if ((!products || products.length === 0) && crossReferences.length > 0) {
+            for (const altNumber of crossReferences) {
+              console.log(`[${scraper.shopId}] Trying cross-reference:`, altNumber);
+              products = await scraper.search(page, altNumber);
+              if (products && products.length > 0) break;
+            }
+          }
 
           if (!products || products.length === 0) {
             return {
