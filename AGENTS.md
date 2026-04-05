@@ -121,12 +121,12 @@ User → POST /login (captcha verified first)
 ```js
 // Success
 return { status: 'ok', price_net: 12.50, currency: 'EUR', stock_qty: 10,
-         availability: 'Na zalogi', image_url: null, part_number_found: 'ABC123',
+         availability: 'In stock', image_url: null, part_number_found: 'ABC123',
          add_to_cart_url: 'https://...' }
 
 // Not found
 return { status: 'not_found', price_net: null, currency: 'EUR', stock_qty: null,
-         availability: 'Ni na zalogi', image_url: null, part_number_found: '',
+         availability: 'Out of stock', image_url: null, part_number_found: '',
          add_to_cart_url: null }
 ```
 
@@ -146,8 +146,8 @@ return { status: 'not_found', price_net: null, currency: 'EUR', stock_qty: null,
 ### Toast pattern
 ```ts
 import { toast } from 'sonner'
-toast.success('Shranjeno')
-toast.error('Napaka: ' + err.message)
+toast.success('Saved')
+toast.error('Error: ' + err.message)
 ```
 
 ---
@@ -268,6 +268,7 @@ pnpm format
 - All API route handlers must call `next(err)` on error — never `res.status(500).json(...)` inline
 - DB query functions in `@clario/supabase` throw on error — callers must `try/catch`
 - Use `toast.error()` / `toast.success()` (sonner) for user feedback — no `alert()`
+- **Language:** All code must be written in English — variable names, function names, comments, `console.log` messages, and string literals inside code logic (`toast.error()`, `setError()`, `confirm()`, API error responses, code examples in docs). **Exception:** user-facing JSX display strings (labels, headings, button text, placeholders) may be in Slovenian as the product targets Slovenian-speaking users; when i18n is introduced these move to a translation file.
 
 ---
 

@@ -25,7 +25,7 @@ export function MathCaptcha({ apiUrl, onChange }: MathCaptchaProps) {
       setQuestion(data.question);
       setCaptchaId(data.id);
     } catch {
-      setError('Napaka pri nalaganju captcha');
+      setError('Failed to load captcha');
     } finally {
       setLoading(false);
     }
@@ -47,28 +47,28 @@ export function MathCaptcha({ apiUrl, onChange }: MathCaptchaProps) {
   };
 
   const handleVerifyFailed = () => {
-    setError('Napačen odgovor, poskusite znova');
+    setError('Wrong answer, please try again');
     fetchCaptcha();
   };
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-300">
+      <label className="block text-sm font-medium text-muted-foreground">
         Varnostno vprašanje:
       </label>
       {loading ? (
-        <div className="h-10 bg-gray-700 animate-pulse rounded" />
+        <div className="h-10 bg-muted animate-pulse rounded" />
       ) : (
-        <p className="text-white font-semibold">{question}</p>
+        <p className="text-foreground font-semibold">{question}</p>
       )}
       <input
         type="number"
         value={answer}
         onChange={handleChange}
         placeholder="Vaš odgovor"
-        className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+        className="w-full px-3 py-2 bg-background border border-input rounded text-foreground placeholder-muted-foreground focus:outline-none focus:border-primary"
       />
-      {error && <p className="text-red-400 text-sm">{error}</p>}
+      {error && <p className="text-destructive text-sm">{error}</p>}
     </div>
   );
 }

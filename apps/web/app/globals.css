@@ -2,36 +2,122 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --------------------------------------------------------
+   Delight font — place font files in /public/fonts/ and
+   uncomment the @font-face rules below. Supported weights:
+   Regular (400), Medium (500), SemiBold (600).
+   -------------------------------------------------------- */
+/*
+@font-face {
+  font-family: 'Delight';
+  src: url('/fonts/Delight-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Delight';
+  src: url('/fonts/Delight-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Delight';
+  src: url('/fonts/Delight-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   :root {
-    /* Dark navy theme — maps brand colours into shadcn CSS-var system */
-    --background:           234 35% 8%;    /* #0f0f1a */
-    --foreground:           210 20% 92%;
+    /* Analog design system — light theme */
 
-    --card:                 234 33% 12%;
-    --card-foreground:      210 20% 92%;
+    /* Typography — font family */
+    --font-sans: 'Delight', 'Inter', ui-sans-serif, system-ui, sans-serif;
 
-    --popover:              234 33% 12%;
-    --popover-foreground:   210 20% 92%;
+    /* Neutral gray scale */
+    --neutral-50:  #fafafa;
+    --neutral-75:  #f8f8f8;
+    --neutral-100: #f0f0f0;
+    --neutral-150: #e2e5e6;
+    --neutral-200: #cdcfd0;
+    --neutral-300: #b4b7b9;
+    --neutral-400: #9b9fa2;
+    --neutral-500: #81868a;
+    --neutral-600: #686e73;
+    --neutral-700: #4f565c;
+    --neutral-800: #363e45;
+    --neutral-850: #212a32;
+    --neutral-900: #182129;
+    --neutral-950: #040e16;
 
-    --primary:              38 80% 56%;    /* gold  #e8a838 */
-    --primary-foreground:   234 35% 8%;   /* navy text on gold */
+    /* Background */
+    --background:            #ffffff;
+    --background-top:        #f0f0f0;
+    --background-bottom:     #ffffff;
+    --foreground:            #040e16;
 
-    --secondary:            234 28% 18%;
-    --secondary-foreground: 210 20% 92%;
+    /* Border & Input */
+    --border:                #f0f0f0;
+    --input:                 #cdcfd0;
+    --ring:                  #f25136;
 
-    --muted:                234 25% 20%;
-    --muted-foreground:     215 16% 55%;
+    /* Card / Accent background (cards, pop-ups) */
+    --card:                  #fdfdfd;
+    --card-foreground:       #040e16;
+    --accent:                #fdfdfd;
+    --accent-foreground:     #040e16;
+    --accent-border:         #f6f6f7;
 
-    --accent:               38 80% 56%;   /* gold */
-    --accent-foreground:    234 35% 8%;
+    /* Popover / Objectives */
+    --popover:               #ffffff;
+    --popover-foreground:    #040e16;
 
-    --destructive:          0 65% 55%;    /* #d64444 */
-    --destructive-foreground: 210 20% 92%;
+    /* Primary (brand orange) */
+    --primary:               #f25136;
+    --primary-foreground:    #ffffff;
 
-    --border:               234 22% 22%;
-    --input:                234 22% 22%;
-    --ring:                 38 80% 56%;   /* gold focus ring */
+    /* Secondary */
+    --secondary:             #f8f8f8;
+    --secondary-foreground:  #040e16;
+
+    /* Muted / Text */
+    --muted:                 #f0f0f0;
+    --muted-foreground:      #81868a;
+    --muted-foreground-2:    #9b9fa2;
+
+    /* Destructive */
+    --destructive:           #f25136;
+    --destructive-foreground: #ffffff;
+
+    /* Tag */
+    --tag:                   #f8f8f8;
+    --tag-foreground:        #686e73;
+
+    /* Bottom Sheet */
+    --sheet:                 #ffffff;
+    --sheet-border:          #f0f0f0;
+
+    /* Button */
+    --button:                #fdfdfd;
+    --button-border:         #f0f0f0;
+
+    /* Checkbox */
+    --checkbox:              #fdf6f5;
+    --checkbox-border:       #ff6e54;
+
+    /* Brand */
+    --brand-orange:          #f25136;
+
+    /* Blur background */
+    --alpha-40:              rgba(255, 255, 255, 0.6);
 
     --radius: 0.5rem;
   }
@@ -43,5 +129,50 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
   }
+}
+
+/* --------------------------------------------------------
+   Typography utility classes — Analog design system
+   Font: Delight | Weights: Regular (400), Medium (500), SemiBold (600)
+   -------------------------------------------------------- */
+@layer utilities {
+  /* --- Headings --- */
+  .text-display-lg    { font-size: 64px; line-height: 1.2;   font-weight: 500; }
+  .text-display-md    { font-size: 48px; line-height: 1.2;   font-weight: 600; }
+  .text-display-sm    { font-size: 40px; line-height: 40px;  font-weight: 400; }
+  .text-headline-lg   { font-size: 36px; line-height: 36px;  font-weight: 500; }
+  .text-headline-md   { font-size: 32px; line-height: 40px;  font-weight: 500; }
+  .text-headline-sm   { font-size: 30px; line-height: 36px;  font-weight: 600; }
+  .text-title-lg      { font-size: 30px; line-height: 36px;  font-weight: 400; }
+  .text-title-md      { font-size: 28px; line-height: 28px;  font-weight: 500; }
+  .text-title-sm      { font-size: 24px; line-height: 36px;  font-weight: 400; }
+
+  /* --- Labels --- */
+  .text-label-lg      { font-size: 20px; line-height: 28px;  font-weight: 400; }
+  .text-label-lg-md   { font-size: 20px; line-height: 28px;  font-weight: 500; }
+  .text-label-lg-sb   { font-size: 20px; line-height: 28px;  font-weight: 600; }
+  .text-label-md      { font-size: 18px; line-height: 24px;  font-weight: 400; }
+  .text-label-md-md   { font-size: 18px; line-height: 24px;  font-weight: 500; }
+  .text-label-md-sb   { font-size: 18px; line-height: 24px;  font-weight: 600; }
+  .text-label-sm      { font-size: 16px; line-height: 24px;  font-weight: 400; }
+  .text-label-sm-md   { font-size: 16px; line-height: 24px;  font-weight: 500; }
+  .text-label-sm-sb   { font-size: 16px; line-height: 24px;  font-weight: 600; }
+
+  /* --- Body --- */
+  .text-body-lg       { font-size: 14px; line-height: 20px;  font-weight: 400; }
+  .text-body-lg-md    { font-size: 14px; line-height: 20px;  font-weight: 500; }
+  .text-body-lg-sb    { font-size: 14px; line-height: 20px;  font-weight: 600; }
+  .text-body-md       { font-size: 12px; line-height: 16px;  font-weight: 400; }
+  .text-body-md-md    { font-size: 12px; line-height: 16px;  font-weight: 500; }
+  .text-body-md-sb    { font-size: 12px; line-height: 16px;  font-weight: 600; }
+  .text-body-sm       { font-size: 10px; line-height: 12px;  font-weight: 400; }
+  .text-body-sm-md    { font-size: 10px; line-height: 12px;  font-weight: 500; }
+  .text-body-sm-sb    { font-size: 10px; line-height: 12px;  font-weight: 600; }
+}
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }

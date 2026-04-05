@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
@@ -28,13 +28,15 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  const isPublicPage = pathname === '/';
+  const isAuthRoute =
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password');
   const isPublicAsset = /\.(svg|png|jpg|jpeg|gif|webp|ico|css|js)$/.test(pathname);
 
-  const isLandingPage = pathname === '/';
-
-  if (!user && !isAuthRoute && !isPublicAsset && !isLandingPage) {
+  if (!user && !isAuthRoute && !isPublicPage && !isPublicAsset) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     return NextResponse.redirect(loginUrl);

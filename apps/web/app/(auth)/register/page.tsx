@@ -25,18 +25,16 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 8) {
-      toast.error('Geslo mora imeti vsaj 8 znakov');
-      return;
-    }
-
     if (password !== confirmPassword) {
-      toast.error('Gesli se ne ujemata');
+      toast.error('Passwords do not match');
       return;
     }
-
+    if (password.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
     if (!captcha) {
-      toast.error('Prosimo, rešite varnostno vprašanje');
+      toast.error('Please solve the security question');
       return;
     }
 
@@ -49,32 +47,25 @@ export default function RegisterPage() {
       });
       const { valid } = await captchaRes.json();
       if (!valid) {
-        toast.error('Napačen odgovor, poskusite znova');
+        toast.error('Wrong answer, please try again');
         setCaptcha(null);
         return;
       }
     } catch {
-      toast.error('Napaka pri preverjanju captcha');
+      toast.error('Captcha verification failed');
       return;
     }
 
     setLoading(true);
     try {
       const supabase = createClient();
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { company_name: companyName },
-        },
-      });
-
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) {
         toast.error(error.message);
         return;
       }
 
-      // Update profile with company name (trigger creates the row, we update it)
+      // Update profile with company name
       if (data.user) {
         await supabase
           .from('profiles')
@@ -82,10 +73,10 @@ export default function RegisterPage() {
           .eq('id', data.user.id);
       }
 
-      toast.success('Registracija uspešna! Prijavite se.');
+      toast.success('Account created — you can now log in');
       router.push('/login');
     } catch {
-      toast.error('Napaka pri registraciji');
+      toast.error('Registration failed');
     } finally {
       setLoading(false);
     }
@@ -134,7 +125,6 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Najmanj 8 znakov"
                 required
-                minLength={8}
                 autoComplete="new-password"
               />
             </div>
@@ -146,26 +136,26 @@ export default function RegisterPage() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Ponovi geslo"
                 required
-                minLength={8}
                 autoComplete="new-password"
               />
             </div>
 
             <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Registracija...' : 'Ustvari račun'}
+            <Button type="submit" className="w-full" disabled={loading || !captcha}>
+              {loading ? 'Registracija…' : 'Ustvari račun'}
             </Button>
-          </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            Že imate račun?{' '}
-            <Link href="/login" className="text-primary hover:underline">
-              Prijava
-            </Link>
-          </p>
+            <p className="text-center text-sm text-muted-foreground">
+              Že imate račun?{' '}
+              <Link href="/login" className="text-primary hover:underline">
+                Prijava
+              </Link>
+            </p>
+
+          </form>
         </CardContent>
       </Card>
     </div>

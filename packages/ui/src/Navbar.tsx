@@ -10,21 +10,21 @@ interface NavbarProps {
 
 export function Navbar({ companyName, onLogout }: NavbarProps) {
   return (
-    <nav className="bg-[#1a1a2e] border-b border-gray-700">
+    <nav className="bg-white border-b border-border shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <a href="/search" className="text-amber-400 font-bold text-xl tracking-tight">
+            <a href="/search" className="text-primary font-bold text-xl tracking-tight">
               clario.si
             </a>
-            <div className="hidden md:flex items-center gap-4">
-              <a href="/search" className="text-gray-300 hover:text-white text-sm transition-colors">
+            <div className="hidden md:flex items-center gap-1">
+              <a href="/search" className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors">
                 Iskanje
               </a>
-              <a href="/sellers" className="text-gray-300 hover:text-white text-sm transition-colors">
+              <a href="/sellers" className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors">
                 Prodajalci
               </a>
-              <a href="/history" className="text-gray-300 hover:text-white text-sm transition-colors">
+              <a href="/history" className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-secondary rounded-md transition-colors">
                 Zgodovina
               </a>
             </div>
@@ -33,11 +33,11 @@ export function Navbar({ companyName, onLogout }: NavbarProps) {
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
             {companyName && (
-              <span className="text-gray-400 text-sm hidden sm:block">{companyName}</span>
+              <span className="text-muted-foreground text-sm hidden sm:block font-medium">{companyName}</span>
             )}
             <button
               onClick={onLogout}
-              className="text-gray-400 hover:text-white text-sm transition-colors"
+              className="text-sm font-medium text-muted-foreground hover:text-destructive transition-colors"
             >
               Odjava
             </button>

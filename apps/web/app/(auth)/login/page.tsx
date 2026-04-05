@@ -24,7 +24,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!captcha) {
-      toast.error('Prosimo, rešite varnostno vprašanje');
+      toast.error('Please solve the security question');
       return;
     }
 
@@ -37,12 +37,12 @@ export default function LoginPage() {
       });
       const { valid } = await captchaRes.json();
       if (!valid) {
-        toast.error('Napačen odgovor, poskusite znova');
+        toast.error('Wrong answer, please try again');
         setCaptcha(null);
         return;
       }
     } catch {
-      toast.error('Napaka pri preverjanju captcha');
+      toast.error('Captcha verification failed');
       return;
     }
 
@@ -57,14 +57,20 @@ export default function LoginPage() {
       router.push('/search');
       router.refresh();
     } catch {
-      toast.error('Napaka pri prijavi');
+      toast.error('Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
+      <Link
+        href="/"
+        className="absolute top-6 left-6 text-lg font-extrabold text-foreground hover:opacity-80 transition-opacity"
+      >
+        clario<span className="text-muted-foreground">.si</span>
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
@@ -103,6 +109,15 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Prijavljanje…' : 'Prijava'}
             </Button>
+
+            <div className="flex justify-between text-sm text-muted-foreground pt-1">
+              <Link href="/forgot-password" className="text-primary hover:underline">
+                Pozabljeno geslo?
+              </Link>
+              <Link href="/register" className="text-primary hover:underline">
+                Ustvari račun
+              </Link>
+            </div>
           </form>
 
           <div className="mt-4 space-y-2 text-center text-sm">
