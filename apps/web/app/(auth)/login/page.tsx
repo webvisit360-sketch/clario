@@ -119,6 +119,18 @@ export default function LoginPage() {
               </Link>
             </div>
           </form>
+
+          <div className="mt-4 space-y-2 text-center text-sm">
+            <Link href="/forgot-password" className="text-muted-foreground hover:text-primary transition-colors block">
+              Pozabljeno geslo?
+            </Link>
+            <p className="text-muted-foreground">
+              Nimate računa?{' '}
+              <Link href="/register" className="text-primary hover:underline">
+                Ustvari račun
+              </Link>
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>

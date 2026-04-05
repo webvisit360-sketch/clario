@@ -64,8 +64,8 @@ export interface HistoryEntry {
 
 export interface ShopScraper {
   shopId: string;
-  login(page: import('playwright').Page, credentials: ShopCredentials): Promise<boolean>;
-  search(page: import('playwright').Page, partNumber: string): Promise<ScrapedProduct[]>;
+  login(page: any, credentials: ShopCredentials): Promise<boolean>;
+  search(page: any, partNumber: string): Promise<ScrapedProduct[]>;
 }
 
 export interface ShopCredentials {

@@ -3,19 +3,21 @@
 // Search: https://www.autodoc.de/search?query={partNumber}
 // Price selectors: .price-value, fallback JSON in <script type="application/json">
 
-const shopId = 'autodoc';
+import type { Page } from 'playwright';
+import type { Seller, ShopCredentials, ScrapedProduct, SearchResult } from '@clario/shared';
 
-function matches(seller) {
+export const shopId = 'autodoc';
+
+export function matches(seller: Seller): boolean {
   return seller.url?.toLowerCase().includes('autodoc') ||
     seller.name?.toLowerCase().includes('autodoc');
 }
 
-async function login(page, credentials) {
+export async function login(page: Page, credentials: ShopCredentials): Promise<boolean> {
   try {
     console.log('[autodoc] logging in...');
     await page.goto('https://www.autodoc.de/login', { waitUntil: 'domcontentloaded' });
 
-    // Restore session if cookie provided
     if (credentials.sessionCookie) {
       console.log('[autodoc] reusing session cookie');
       return true;
@@ -27,14 +29,12 @@ async function login(page, credentials) {
 
     await page.waitForURL('**/account**', { timeout: 10000 }).catch(() => {});
 
-    // Check if login was successful by looking for account-related elements
     const isLoggedIn = await page.$('.user-menu, .account-menu, [data-testid="user-menu"]');
     if (isLoggedIn) {
       console.log('[autodoc] login successful');
       return true;
     }
 
-    // Check for error messages
     const errorEl = await page.$('.error-message, .alert-danger, [class*="error"]');
     if (errorEl) {
       console.log('[autodoc] login failed — error message found');
@@ -43,13 +43,13 @@ async function login(page, credentials) {
 
     console.log('[autodoc] login status uncertain, proceeding');
     return true;
-  } catch (err) {
+  } catch (err: any) {
     console.log('[autodoc] login error:', err.message);
     return false;
   }
 }
 
-async function search(page, partNumber) {
+export async function search(page: Page, partNumber: string): Promise<ScrapedProduct[]> {
   try {
     console.log('[autodoc] searching for:', partNumber);
     await page.goto(`https://www.autodoc.de/search?query=${encodeURIComponent(partNumber)}`, {
@@ -58,32 +58,29 @@ async function search(page, partNumber) {
 
     await page.waitForSelector('.product-list, .search-results, [class*="product"]', { timeout: 8000 }).catch(() => {});
 
-    // Try to extract price from .price-value selector
-    let priceNet = null;
+    let priceNet: number | null = null;
     let productName = '';
-    let stockQty = null;
+    let stockQty: number | null = null;
     let availability = '';
-    let imageUrl = null;
-    let addToCartUrl = null;
-    let partNumberFound = partNumber;
+    let imageUrl: string | null = null;
+    const addToCartUrl: string | null = null;
+    const partNumberFound = partNumber;
 
-    // Try .price-value first
     const priceEl = await page.$('.price-value, .product-price, [class*="price"]');
     if (priceEl) {
       const priceText = await priceEl.textContent();
-      const match = priceText.match(/[\d.,]+/);
+      const match = priceText?.match(/[\d.,]+/);
       if (match) {
         priceNet = parseFloat(match[0].replace(',', '.'));
       }
     }
 
-    // Fallback: look for JSON data in script tags
     if (priceNet === null) {
       const jsonScripts = await page.$$('script[type="application/json"], script[type="application/ld+json"]');
       for (const script of jsonScripts) {
         try {
           const content = await script.textContent();
-          const data = JSON.parse(content);
+          const data = JSON.parse(content ?? '');
           if (data.price || data.offers?.price) {
             priceNet = parseFloat(data.price || data.offers.price);
             break;
@@ -94,21 +91,18 @@ async function search(page, partNumber) {
       }
     }
 
-    // Extract product name
     const nameEl = await page.$('.product-name, .product-title, h1[class*="product"], [class*="title"]');
     if (nameEl) {
-      productName = (await nameEl.textContent()).trim();
+      productName = (await nameEl.textContent())?.trim() ?? '';
     }
 
-    // Extract stock info
     const stockEl = await page.$('[class*="stock"], [class*="availability"], .availability');
     if (stockEl) {
-      availability = (await stockEl.textContent()).trim();
+      availability = (await stockEl.textContent())?.trim() ?? '';
       const qtyMatch = availability.match(/(\d+)/);
       if (qtyMatch) stockQty = parseInt(qtyMatch[1], 10);
     }
 
-    // Extract image
     const imgEl = await page.$('.product-image img, [class*="product"] img');
     if (imgEl) {
       imageUrl = await imgEl.getAttribute('src');
@@ -130,14 +124,13 @@ async function search(page, partNumber) {
       imageUrl,
       addToCartUrl,
     }];
-  } catch (err) {
+  } catch (err: any) {
     console.log('[autodoc] search error:', err.message);
     return [];
   }
 }
 
-// Legacy scrape function for backward compatibility with existing search.js
-async function scrape(credentials, partNumber, seller) {
+export async function scrape(_credentials: unknown, partNumber: string, seller: Seller): Promise<SearchResult & { seller_id: string; seller_name: string }> {
   return {
     seller_id: seller.id,
     seller_name: seller.name,
@@ -152,5 +145,3 @@ async function scrape(credentials, partNumber, seller) {
     error: 'Use B2B stream endpoint for scraping',
   };
 }
-
-module.exports = { shopId, matches, login, search, scrape };

@@ -1,10 +1,15 @@
-const { v4: uuidv4 } = require('uuid');
+import { v4 as uuidv4 } from 'uuid';
 
-const captchas = new Map();
+interface CaptchaEntry {
+  answer: number;
+  expiresAt: number;
+}
+
+const captchas = new Map<string, CaptchaEntry>();
 
 const EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
-function generateCaptcha() {
+export function generateCaptcha(): { id: string; question: string } {
   const a = Math.floor(Math.random() * 20) + 1;
   const b = Math.floor(Math.random() * 20) + 1;
   const isAddition = Math.random() > 0.5;
@@ -18,7 +23,7 @@ function generateCaptcha() {
   return { id, question };
 }
 
-function verifyCaptcha(id, answer) {
+export function verifyCaptcha(id: string, answer: unknown): boolean {
   const captcha = captchas.get(id);
   if (!captcha) return false;
 
@@ -35,5 +40,3 @@ setInterval(() => {
     if (now > captcha.expiresAt) captchas.delete(id);
   }
 }, 60_000);
-
-module.exports = { generateCaptcha, verifyCaptcha };
