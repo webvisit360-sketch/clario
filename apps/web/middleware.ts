@@ -12,7 +12,7 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           supabaseResponse = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
@@ -32,7 +32,9 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
   const isPublicAsset = /\.(svg|png|jpg|jpeg|gif|webp|ico|css|js)$/.test(pathname);
 
-  if (!user && !isAuthRoute && !isPublicAsset) {
+  const isLandingPage = pathname === '/';
+
+  if (!user && !isAuthRoute && !isPublicAsset && !isLandingPage) {
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = '/login';
     return NextResponse.redirect(loginUrl);
