@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import type { HistoryEntry } from '@clario/shared';
+import { BackButton } from '@/components/ui/back-button';
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -29,7 +30,8 @@ export default function HistoryPage() {
   };
 
   return (
-    <div>
+    <div className="relative">
+      <BackButton />
       <h1 className="text-2xl font-bold text-foreground mb-6">Zgodovina iskanj</h1>
 
       {loading ? (

@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { MathCaptcha } from '@clario/ui';
 import { api } from '@/lib/api';
 import type { Seller, SellerCreateInput } from '@clario/shared';
+import { BackButton } from '@/components/ui/back-button';
 
 export default function SellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -82,6 +83,7 @@ export default function SellersPage() {
 
   return (
     <div>
+      <BackButton />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Prodajalci</h1>
         <button

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BackButton } from '@/components/ui/back-button';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -83,7 +84,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative">
+      <BackButton href="/login" />
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
