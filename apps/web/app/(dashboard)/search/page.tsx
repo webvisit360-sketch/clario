@@ -1,27 +1,27 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SellerCard } from '@clario/ui';
 import { api } from '@/lib/api';
+import { EmptyState } from '@/components/empty-state';
 import type { SearchResponse, SearchResult } from '@clario/shared';
 
 export default function SearchPage() {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) return;
-
+  const runSearch = useCallback(async (partNumber: string) => {
+    if (!partNumber.trim()) return;
     setLoading(true);
     setSearched(true);
     setResults([]);
-
     try {
       const { data } = await api.get<SearchResponse>('/api/search', {
-        params: { q: query.trim() },
+        params: { q: partNumber.trim() },
       });
       setResults(data.results);
     } catch (err) {
@@ -29,6 +29,20 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  // Auto-search from URL param (navbar search → redirect)
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) {
+      setQuery(q);
+      runSearch(q);
+    }
+  }, [searchParams, runSearch]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    runSearch(query);
   };
 
   return (
@@ -40,7 +54,7 @@ export default function SearchPage() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Vnesite številko dela (npr. 1K0615301AC)"
+          placeholder="Vnesite kataloško številko (npr. 1K0615301AC)"
           className="flex-1 px-4 py-3 bg-card border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring shadow-sm"
         />
         <button
@@ -83,12 +97,20 @@ export default function SearchPage() {
       )}
 
       {!loading && searched && results.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">Ni rezultatov za iskanje</p>
-          <p className="text-muted-foreground text-sm mt-2">
-            Preverite številko dela ali dodajte prodajalce
-          </p>
-        </div>
+        <EmptyState
+          icon="🔍"
+          title="Ni rezultatov"
+          description="Za to kataloško številko ni bilo najdenih rezultatov. Preverite številko ali dodajte dodatne prodajalce."
+          action={{ label: 'Upravljaj prodajalce', href: '/sellers' }}
+        />
+      )}
+
+      {!loading && !searched && (
+        <EmptyState
+          icon="🔎"
+          title="Iskanje rezervnih delov"
+          description="Vnesite OEM ali kataloško številko rezervnega dela in primerjajte cene pri vseh vaših dobaviteljih hkrati."
+        />
       )}
     </div>
   );

@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { AuthLayout } from '@/components/auth-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -35,35 +35,35 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-1">
-          <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
-          <CardDescription>Ponastavitev gesla</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {sent ? (
-            <div className="text-center space-y-4">
+    <AuthLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Ponastavitev gesla</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {sent
+              ? 'Preverite vaš e-poštni predal'
+              : 'Vnesite e-pošto in poslali vam bomo navodila'}
+          </p>
+        </div>
+
+        {sent ? (
+          <div className="space-y-4">
+            <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm">
               <p className="text-foreground">
-                Poslali smo vam e-pošto z navodili za ponastavitev gesla.
+                Povezava za ponastavitev gesla je bila poslana na{' '}
+                <span className="font-medium">{email}</span>.
               </p>
-              <p className="text-sm text-muted-foreground">
-                Preverite tudi mapo Nezaželena pošta. Če e-pošte ne prejmete,
-                nas kontaktirajte na{' '}
-                <a href="mailto:pi4.doo@gmail.com" className="text-primary hover:underline">
-                  pi4.doo@gmail.com
-                </a>
-                .
+              <p className="text-muted-foreground mt-2">
+                Preverite tudi mapo Nezaželena pošta (spam).
               </p>
-              <Link href="/login" className="text-primary hover:underline text-sm block">
-                Nazaj na prijavo
-              </Link>
             </div>
-          ) : (
+            <Link href="/login" className="text-primary hover:underline text-sm block text-center">
+              Nazaj na prijavo
+            </Link>
+          </div>
+        ) : (
+          <>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Vnesite vaš e-poštni naslov in poslali vam bomo povezavo za ponastavitev gesla.
-              </p>
               <div className="space-y-1.5">
                 <Label htmlFor="email">E-pošta</Label>
                 <Input
@@ -78,18 +78,18 @@ export default function ForgotPasswordPage() {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Pošiljanje…' : 'Pošlji navodila'}
+                {loading ? 'Pošiljanje...' : 'Pošlji navodila'}
               </Button>
-
-              <p className="text-center text-sm text-muted-foreground">
-                <Link href="/login" className="text-primary hover:underline">
-                  Nazaj na prijavo
-                </Link>
-              </p>
             </form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+
+            <p className="text-center text-sm text-muted-foreground">
+              <Link href="/login" className="text-primary hover:underline">
+                Nazaj na prijavo
+              </Link>
+            </p>
+          </>
+        )}
+      </div>
+    </AuthLayout>
   );
 }

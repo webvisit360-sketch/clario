@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { MathCaptcha } from '@clario/ui';
 import { createClient } from '@/lib/supabase/client';
+import { AuthLayout } from '@/components/auth-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -38,7 +38,6 @@ export default function RegisterPage() {
       return;
     }
 
-    // Verify captcha
     try {
       const captchaRes = await fetch(`${apiUrl}/api/captcha/verify`, {
         method: 'POST',
@@ -65,7 +64,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Update profile with company name
       if (data.user) {
         await supabase
           .from('profiles')
@@ -83,81 +81,82 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-1">
-          <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
-          <CardDescription>Ustvarite nov račun</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">E-pošta</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="vas@email.si"
-                required
-                autoComplete="email"
-              />
-            </div>
+    <AuthLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Ustvari račun</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Brezplačna registracija za vaš avtoservis
+          </p>
+        </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="company">Ime podjetja</Label>
-              <Input
-                id="company"
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                placeholder="Vaše podjetje d.o.o."
-                required
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="email">E-pošta</Label>
+            <Input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="vas@email.si"
+              required
+              autoComplete="email"
+            />
+          </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Geslo</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Najmanj 8 znakov"
-                required
-                autoComplete="new-password"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="company">Ime podjetja</Label>
+            <Input
+              id="company"
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              placeholder="Vaše podjetje d.o.o."
+              required
+            />
+          </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="confirmPassword">Potrdi geslo</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Ponovi geslo"
-                required
-                autoComplete="new-password"
-              />
-            </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="password">Geslo</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Najmanj 8 znakov"
+              required
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </div>
 
-            <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
+          <div className="space-y-1.5">
+            <Label htmlFor="confirmPassword">Potrdi geslo</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Ponovi geslo"
+              required
+              autoComplete="new-password"
+            />
+          </div>
 
-            <Button type="submit" className="w-full" disabled={loading || !captcha}>
-              {loading ? 'Registracija…' : 'Ustvari račun'}
-            </Button>
+          <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
 
-            <p className="text-center text-sm text-muted-foreground">
-              Že imate račun?{' '}
-              <Link href="/login" className="text-primary hover:underline">
-                Prijava
-              </Link>
-            </p>
+          <Button type="submit" className="w-full" disabled={loading || !captcha}>
+            {loading ? 'Registracija...' : 'Ustvari račun'}
+          </Button>
+        </form>
 
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+        <p className="text-center text-sm text-muted-foreground">
+          Že imate račun?{' '}
+          <Link href="/login" className="text-primary font-medium hover:underline">
+            Prijava
+          </Link>
+        </p>
+      </div>
+    </AuthLayout>
   );
 }

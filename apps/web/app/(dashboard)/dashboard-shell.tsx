@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Navbar } from '@clario/ui';
 import { createClient } from '@/lib/supabase/client';
+import { SiteNavbar } from '@/components/site-navbar';
 
 export default function DashboardShell({
   companyName,
@@ -23,7 +23,7 @@ export default function DashboardShell({
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar companyName={companyName} onLogout={handleLogout} />
+      <SiteNavbar user={{ companyName }} onLogout={handleLogout} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>

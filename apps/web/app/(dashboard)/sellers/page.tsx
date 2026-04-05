@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { MathCaptcha } from '@clario/ui';
 import { api } from '@/lib/api';
+import { EmptyState } from '@/components/empty-state';
+import { PageHeader } from '@/components/page-header';
 import type { Seller, SellerCreateInput } from '@clario/shared';
 
 export default function SellersPage() {
@@ -82,15 +84,17 @@ export default function SellersPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Prodajalci</h1>
+      <PageHeader
+        title="Prodajalci"
+        badge={!loading && sellers.length > 0 ? `${sellers.filter(s => s.active).length} aktivnih` : undefined}
+      >
         <button
           onClick={() => setShowModal(true)}
           className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors shadow-sm"
         >
           Dodaj prodajalca
         </button>
-      </div>
+      </PageHeader>
 
       {loading ? (
         <div className="animate-pulse space-y-3">
@@ -99,9 +103,12 @@ export default function SellersPage() {
           ))}
         </div>
       ) : sellers.length === 0 ? (
-        <p className="text-muted-foreground text-center py-12">
-          Še nimate dodanih prodajalcev
-        </p>
+        <EmptyState
+          icon="🏪"
+          title="Dodajte prvega dobavitelja"
+          description="Povežite vaše B2B račune pri dobaviteljih avtodelov. Sistem se bo prijavil z vašimi podatki in primerjal cene."
+          action={{ label: 'Dodaj prodajalca', onClick: () => setShowModal(true) }}
+        />
       ) : (
         <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
           <table className="w-full text-left">

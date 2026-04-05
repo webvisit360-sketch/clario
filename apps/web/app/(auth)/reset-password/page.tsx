@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/client';
+import { AuthLayout } from '@/components/auth-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -17,8 +18,6 @@ export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Supabase puts the session tokens in the URL hash after the reset link click.
-    // createClient() picks them up automatically via onAuthStateChange.
     const supabase = createClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
@@ -56,18 +55,26 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-1">
-          <CardTitle className="text-3xl font-bold text-primary">clario.si</CardTitle>
-          <CardDescription>Novo geslo</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!ready ? (
-            <p className="text-center text-muted-foreground text-sm">
-              Preverjanje povezave… prosimo počakajte.
+    <AuthLayout>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Novo geslo</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Vnesite novo geslo za vaš račun
+          </p>
+        </div>
+
+        {!ready ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Preverjanje povezave... prosimo počakajte.
             </p>
-          ) : (
+            <Link href="/forgot-password" className="text-primary hover:underline text-sm block">
+              Zahtevaj novo povezavo
+            </Link>
+          </div>
+        ) : (
+          <>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="password">Novo geslo</Label>
@@ -78,6 +85,7 @@ export default function ResetPasswordPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Najmanj 8 znakov"
                   required
+                  minLength={8}
                   autoComplete="new-password"
                 />
               </div>
@@ -96,12 +104,18 @@ export default function ResetPasswordPage() {
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Shranjevanje…' : 'Shrani novo geslo'}
+                {loading ? 'Shranjevanje...' : 'Shrani novo geslo'}
               </Button>
             </form>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+
+            <p className="text-center text-sm text-muted-foreground">
+              <Link href="/login" className="text-primary hover:underline">
+                Nazaj na prijavo
+              </Link>
+            </p>
+          </>
+        )}
+      </div>
+    </AuthLayout>
   );
 }

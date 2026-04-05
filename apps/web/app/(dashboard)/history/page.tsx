@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { EmptyState } from '@/components/empty-state';
+import { PageHeader } from '@/components/page-header';
 import type { HistoryEntry } from '@clario/shared';
 
 export default function HistoryPage() {
@@ -30,7 +32,10 @@ export default function HistoryPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground mb-6">Zgodovina iskanj</h1>
+      <PageHeader
+        title="Zgodovina iskanj"
+        badge={!loading && history.length > 0 ? `${history.length} iskanj` : undefined}
+      />
 
       {loading ? (
         <div className="animate-pulse space-y-3">
@@ -39,9 +44,12 @@ export default function HistoryPage() {
           ))}
         </div>
       ) : history.length === 0 ? (
-        <p className="text-muted-foreground text-center py-12">
-          Še nimate iskanj v zgodovini
-        </p>
+        <EmptyState
+          icon="📋"
+          title="Še nimate iskanj"
+          description="Ko boste iskali rezervne dele, se bo zgodovina iskanj prikazala tukaj. Ponovite naročilo z enim klikom."
+          action={{ label: 'Začni iskanje', href: '/search' }}
+        />
       ) : (
         <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
           <table className="w-full text-left">

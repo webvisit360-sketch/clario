@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { SavingsCalculator } from './_components/savings-calculator';
+import { SiteNavbar } from '@/components/site-navbar';
 
 const tickerData = [
   { seller: 'Inter Cars', price: '24,80 €' },
@@ -42,41 +43,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* ── NAVBAR ── */}
-      <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border h-[52px] flex items-center px-6">
-        <div className="flex items-center gap-2 mr-auto">
-          <Link href="/" className="text-xl font-extrabold" style={{ fontFamily: 'var(--font-syne)' }}>
-            clario<span className="text-muted-foreground">.si</span>
-          </Link>
-          <span
-            className="text-muted-foreground uppercase tracking-wider"
-            style={{ fontFamily: 'var(--font-dm-mono)', fontSize: '9px' }}
-          >
-            B2B Parts
-          </span>
-        </div>
-
-        <div className="hidden md:flex items-center gap-6 text-sm text-foreground absolute left-1/2 -translate-x-1/2">
-          <a href="#funkcionalnosti" className="hover:text-primary transition-colors">Funkcionalnosti</a>
-          <a href="#cenik" className="hover:text-primary transition-colors">Cenik</a>
-          <a href="#kako-deluje" className="hover:text-primary transition-colors">Prodajalci</a>
-          <a href="#kalkulator" className="hover:text-primary transition-colors">O nas</a>
-        </div>
-
-        <div className="flex items-center gap-3 ml-auto">
-          <Link
-            href="/login"
-            className="text-sm border border-border rounded-lg px-4 py-1.5 hover:bg-muted transition-colors"
-          >
-            Prijava
-          </Link>
-          <Link
-            href="/register"
-            className="text-sm bg-primary text-primary-foreground rounded-lg px-4 py-1.5 hover:opacity-90 transition-opacity"
-          >
-            Brezplačna registracija
-          </Link>
-        </div>
-      </nav>
+      <SiteNavbar />
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden" style={{ minHeight: 560 }}>
