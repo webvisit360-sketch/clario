@@ -2,3 +2,4 @@ export { browserClient, serverClient } from './client';
 export { getSellers, createSeller, updateSeller, deleteSeller, updateSellerSession, markLoginFailed, getSellersWithCredentials } from './queries/sellers';
 export { saveSearch, getHistory } from './queries/history';
 export { getProfile, createProfile, upsertProfile } from './queries/profiles';
+export { getCachedTecDoc, cacheTecDocResult } from './queries/tecdoc';

@@ -107,3 +107,31 @@ export interface SellerWithCredentials extends Seller {
   login_password_encrypted: string;
   login_password_iv: string;
 }
+
+// ─────────────────────────────────────────────
+// TecDoc Integration Types
+// ─────────────────────────────────────────────
+
+export interface TecDocArticle {
+  brandNo: number;
+  brandName: string;
+  articleNo: string;
+  genericArticleNo: number;
+  genericArticleName: string;
+  oeNumbers: string[];
+  tradeNumbers: string[];
+}
+
+export interface TecDocSearchResult {
+  query: string;
+  articles: TecDocArticle[];
+  crossReferences: string[];
+  source: 'api' | 'cache' | 'mock';
+}
+
+export interface SSETecDoc {
+  type: 'tecdoc';
+  originalQuery: string;
+  articles: TecDocArticle[];
+  crossReferences: string[];
+}

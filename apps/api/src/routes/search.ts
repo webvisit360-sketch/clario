@@ -4,6 +4,7 @@ import { requireAuth, type AuthEnv } from '../middleware/requireAuth.js';
 import { decrypt } from '../utils/encrypt.js';
 import { getSellersWithCredentials, saveSearch, serverClient } from '@clario/supabase';
 import { scrapeB2B } from '../services/brightDataService.js';
+import { searchByNumber } from '../services/tecdocService.js';
 
 import * as intercars from '../scrapers/intercars.js';
 import * as elit from '../scrapers/elit.js';
@@ -138,12 +139,32 @@ app.get('/b2b-stream', async (c) => {
   }
 
   return streamSSE(c, async (stream) => {
+    // Step 1: TecDoc cross-reference lookup
+    let crossReferences: string[] = [];
+    try {
+      const tecdocResult = await searchByNumber(partNumber);
+      crossReferences = tecdocResult.crossReferences;
+
+      await stream.writeSSE({
+        data: JSON.stringify({
+          type: 'tecdoc',
+          originalQuery: partNumber,
+          articles: tecdocResult.articles,
+          crossReferences: tecdocResult.crossReferences,
+        }),
+      });
+    } catch (err: any) {
+      console.log('[search] TecDoc lookup failed:', err.message);
+      // Continue without cross-references — scrapers still work
+    }
+
+    // Step 2: B2B scraping with cross-references
     let successful = 0;
 
     await scrapeB2B(c.get('user').id, sellers, partNumber, (result) => {
       if (result.status === 'ok') successful++;
       stream.writeSSE({ data: JSON.stringify({ type: 'result', ...result }) });
-    });
+    }, crossReferences);
 
     await stream.writeSSE({
       data: JSON.stringify({ type: 'done', totalShops: sellers.length, successful }),

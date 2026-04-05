@@ -203,6 +203,9 @@ CSS variables are defined in `globals.css`. Use semantic tokens in new code:
 | `BRIGHT_DATA_WSS` | api | Bright Data Scraping Browser WebSocket endpoint |
 | `BRIGHT_DATA_ZONE` | api | Bright Data zone name |
 | `APP_SECRET` | api | 32-char secret for session tokens |
+| `TECDOC_API_URL` | api | TecAlliance Web Service endpoint (optional) |
+| `TECDOC_API_KEY` | api | TecAlliance API key (optional — mock used if absent) |
+| `TECDOC_PROVIDER_ID` | api | TecAlliance provider ID (optional — mock used if absent) |
 
 **Never commit `.env`**. Copy `.env.example` → `.env` and fill in values.
 
