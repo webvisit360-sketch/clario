@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { MathCaptcha } from '@clario/ui';
 import { api } from '@/lib/api';
 import type { Seller, SellerCreateInput } from '@clario/shared';
 import { BackButton } from '@/components/ui/back-button';
@@ -11,10 +10,7 @@ export default function SellersPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [captcha, setCaptcha] = useState<{ captchaId: string; answer: number } | null>(null);
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<SellerCreateInput>();
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  const { register, handleSubmit, reset } = useForm<SellerCreateInput>();
 
   const fetchSellers = async () => {
     try {
@@ -32,28 +28,10 @@ export default function SellersPage() {
   }, []);
 
   const onSubmit = async (data: SellerCreateInput) => {
-    if (!captcha) return;
-
-    try {
-      const res = await fetch(`${apiUrl}/api/captcha/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: captcha.captchaId, answer: captcha.answer }),
-      });
-      const result = await res.json();
-      if (!result.valid) {
-        setCaptcha(null);
-        return;
-      }
-    } catch {
-      return;
-    }
-
     try {
       await api.post('/api/sellers', data);
       setShowModal(false);
       reset();
-      setCaptcha(null);
       fetchSellers();
     } catch (err) {
       console.error('Failed to create seller:', err);
@@ -82,7 +60,7 @@ export default function SellersPage() {
   const inputClass = 'w-full px-3 py-2 bg-background border border-border rounded text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm';
 
   return (
-    <div>
+    <div className="relative">
       <BackButton />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-foreground">Prodajalci</h1>
@@ -169,8 +147,6 @@ export default function SellersPage() {
                 <input {...register('notes')} className={inputClass} />
               </div>
 
-              <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
-
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -181,8 +157,7 @@ export default function SellersPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={!captcha}
-                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 text-primary-foreground font-medium rounded-lg transition-colors"
+                  className="flex-1 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg transition-colors"
                 >
                   Shrani
                 </button>

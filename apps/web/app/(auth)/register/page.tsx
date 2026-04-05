@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { MathCaptcha } from '@clario/ui';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,9 +18,6 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [captcha, setCaptcha] = useState<{ captchaId: string; answer: number } | null>(null);
-
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,28 +30,6 @@ export default function RegisterPage() {
       toast.error('Password must be at least 8 characters');
       return;
     }
-    if (!captcha) {
-      toast.error('Please solve the security question');
-      return;
-    }
-
-    // Verify captcha
-    try {
-      const captchaRes = await fetch(`${apiUrl}/api/captcha/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: captcha.captchaId, answer: captcha.answer }),
-      });
-      const { valid } = await captchaRes.json();
-      if (!valid) {
-        toast.error('Wrong answer, please try again');
-        setCaptcha(null);
-        return;
-      }
-    } catch {
-      toast.error('Captcha verification failed');
-      return;
-    }
 
     setLoading(true);
     try {
@@ -66,7 +40,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Update profile with company name
       if (data.user) {
         await supabase
           .from('profiles')
@@ -144,9 +117,7 @@ export default function RegisterPage() {
               />
             </div>
 
-            <MathCaptcha apiUrl={apiUrl} onChange={setCaptcha} />
-
-            <Button type="submit" className="w-full" disabled={loading || !captcha}>
+            <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Registracija…' : 'Ustvari račun'}
             </Button>
 
@@ -156,7 +127,6 @@ export default function RegisterPage() {
                 Prijava
               </Link>
             </p>
-
           </form>
         </CardContent>
       </Card>
