@@ -1,5 +1,4 @@
-import { config } from 'dotenv';
-config({ path: '../../.env' });
+import './env.js';
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
